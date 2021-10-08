@@ -1,0 +1,1041 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "e832e0b7-649f-40d7-a8b2-2c228bc2eec2",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "summarize by subscriptionId\r\n| project value = strcat('/subscriptions/', subscriptionId), label = subscriptionId",
+            "crossComponentResources": [
+              "value::selected"
+            ],
+            "value": [
+              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ]
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "aaf60011-b4d9-4785-803f-b0ae68b41877",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspace",
+            "label": "Log Analytics Workspace",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\r\n| summarize by id, name\r\n| project id",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "value": [
+              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/soc/providers/microsoft.operationalinsights/workspaces/cybersecuritysoc",
+              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/SOC/providers/Microsoft.OperationalInsights/workspaces/CyberSecuritySoc",
+              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/SOC/providers/Microsoft.OperationalInsights/workspaces/CyberSecuritySOC"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "ce5084e0-aa46-46af-81d5-102b5ca9b953",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time range",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 5184000000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ],
+              "allowCustom": true
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            }
+          },
+          {
+            "id": "b318bfa8-1bbf-4ab3-bf00-87bdfffb8006",
+            "version": "KqlParameterItem/1.0",
+            "name": "Price",
+            "label": "Price per gigabyte (GB)",
+            "type": 1,
+            "value": "2.147",
+            "timeContext": {
+              "durationMs": 86400000
+            }
+          },
+          {
+            "id": "c06d2fa9-0e56-4df9-ae58-4c2270ad2824",
+            "version": "KqlParameterItem/1.0",
+            "name": "ShowNonBillable",
+            "label": "Show Non-Billable",
+            "type": 2,
+            "description": "Choose whether to show billable data types",
+            "isRequired": true,
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "jsonData": "[\r\n    { \"value\":\"true\", \"label\":\"True\"},\r\n    { \"value\":\"false\", \"label\":\"False\", \"selected\":true }\r\n]"
+          },
+          {
+            "id": "84cf84d0-7771-479e-8e5d-0cfe21b2a779",
+            "version": "KqlParameterItem/1.0",
+            "name": "NonBillableOutput",
+            "type": 1,
+            "description": "Filtering Datatypes when non-billable data is ommited",
+            "isRequired": true,
+            "query": "print case('{ShowNonBillable}' == \"false\", toscalar( Usage\r\n    | where IsBillable == \"false\"\r\n    | distinct DataType\r\n    | summarize make_list(DataType)), \"null\")\r\n",
+            "crossComponentResources": [
+              "{Workspace}"
+            ],
+            "isHiddenWhenLocked": true,
+            "timeContext": {
+              "durationMs": 0
+            },
+            "timeContextFromParameter": "TimeRange",
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces"
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "Parameters"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "dde453f4-403a-4f1f-b112-143d92965aa1",
+            "cellValue": "TabSelection",
+            "linkTarget": "parameter",
+            "linkLabel": "By Data Type",
+            "subTarget": "By Data Type",
+            "style": "link"
+          },
+          {
+            "id": "9155ebfd-920a-4e43-a4de-2ba4b3da3564",
+            "cellValue": "TabSelection",
+            "linkTarget": "parameter",
+            "linkLabel": "By Resource",
+            "subTarget": "By Resource",
+            "style": "link"
+          },
+          {
+            "id": "cc6e23b2-37f7-45d1-905f-9888454e1474",
+            "cellValue": "TabSelection",
+            "linkTarget": "parameter",
+            "linkLabel": "By Resource Type",
+            "subTarget": "By Resource Type",
+            "style": "link"
+          }
+        ]
+      },
+      "name": "links - 3"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let NonBillable = parse_json('{NonBillableOutput}');\r\nUsage\r\n| where DataType !in (NonBillable)\r\n| summarize TotalIngestedGB = sum(_BilledSize/1024) by Solution",
+              "size": 0,
+              "showAnalytics": true,
+              "timeContext": {
+                "durationMs": 5184000000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "exportFieldName": "Solution",
+              "exportParameterName": "solutionSelection",
+              "showExportToExcel": true,
+              "exportToExcelOptions": "all",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "visualization": "piechart",
+              "sortBy": [],
+              "chartSettings": {
+                "group": "Solution",
+                "createOtherGroup": null,
+                "ySettings": {
+                  "numberFormatSettings": {
+                    "unit": 5,
+                    "options": {
+                      "style": "decimal",
+                      "useGrouping": true,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              }
+            },
+            "customWidth": "35",
+            "showPin": true,
+            "name": "Volume by Solution Bar Chart",
+            "styleSettings": {
+              "maxWidth": "35"
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let startTime = datetime(\"{TimeRange:startISO}\");\r\nlet endTime = datetime(\"{TimeRange:endISO}\");\r\nlet TimeGranularity = iif( datetime_diff(\"day\", endTime, startTime) <= 7, 1h,1d);\r\nlet NonBillable = parse_json('{NonBillableOutput}');\r\nUsage\r\n| where DataType !in (NonBillable)\r\n| make-series BilledSize = sum(_BilledSize) default = 0 on TimeGenerated from startTime to endTime step TimeGranularity by Solution\r\n",
+              "size": 0,
+              "timeContext": {
+                "durationMs": 5184000000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "visualization": "areachart",
+              "chartSettings": {
+                "xAxis": "TimeGenerated",
+                "ySettings": {
+                  "numberFormatSettings": {
+                    "unit": 4,
+                    "options": {
+                      "style": "decimal",
+                      "useGrouping": true,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              }
+            },
+            "customWidth": "60",
+            "name": "query - 2",
+            "styleSettings": {
+              "maxWidth": "60"
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let NonBillable = parse_json('{NonBillableOutput}');\r\nUsage\r\n| where DataType !in (NonBillable)\r\n| summarize TotalIngestedGB = sum(_BilledSize/1024) by Solution, DataType, IsBillable\r\n| extend Cost = case(IsBillable == \"true\", round(toreal(TotalIngestedGB * toint({Price})),2), toreal(0))\r\n| order by TotalIngestedGB\r\n",
+              "size": 0,
+              "timeContext": {
+                "durationMs": 5184000000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "Solution",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "DataType",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "IsBillable",
+                    "formatter": 1
+                  },
+                  {
+                    "columnMatch": "TotalIngestedGB",
+                    "formatter": 3,
+                    "formatOptions": {
+                      "palette": "blue",
+                      "aggregation": "Sum"
+                    }
+                  },
+                  {
+                    "columnMatch": "Cost",
+                    "formatter": 0,
+                    "formatOptions": {
+                      "aggregation": "Sum"
+                    }
+                  }
+                ],
+                "hierarchySettings": {
+                  "treeType": 1,
+                  "groupBy": [
+                    "DataType"
+                  ],
+                  "finalBy": "Solution"
+                },
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_bar_TotalIngestedGB_4",
+                    "sortOrder": 2
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_bar_TotalIngestedGB_4",
+                  "sortOrder": 2
+                }
+              ]
+            },
+            "name": "query - 1"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "TabSelection",
+        "comparison": "isEqualTo",
+        "value": "By Data Type"
+      },
+      "name": "By Data Type Group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "find where TimeGenerated {TimeRange} project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == \"True\" \r\n| summarize BillableData = sum(_BilledSize) /1.E9\r\n| extend Cost = round((BillableData * toreal({Price})),2)\r\n| extend Title = \"Total Cost\"\r\n\r\n",
+              "size": 0,
+              "timeContext": {
+                "durationMs": 0
+              },
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": {
+                  "columnMatch": "Title",
+                  "formatter": 1
+                },
+                "leftContent": {
+                  "columnMatch": "Cost",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 0,
+                    "options": {
+                      "currency": "GBP",
+                      "style": "currency"
+                    }
+                  }
+                },
+                "secondaryContent": {
+                  "columnMatch": "BillableData",
+                  "formatter": 1,
+                  "numberFormat": {
+                    "unit": 5,
+                    "options": {
+                      "style": "decimal",
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                },
+                "showBorder": false
+              }
+            },
+            "name": "query - Total Cost Tile"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "find where TimeGenerated {TimeRange} project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == \"True\" \r\n| summarize BillableData = sum(_BilledSize) by _ResourceId | sort by BillableData nulls last\r\n| parse _ResourceId with * '/subscriptions/' subscriptionId '/resourcegroups/' resourceGroupName '/' *\r\n| extend subscriptionId = iif (isempty(subscriptionId), \"Not associated to a subscription\", subscriptionId)\r\n| extend resourceGroupId = iif(isnotempty(_ResourceId), strcat(\"/subscriptions/\",subscriptionId,\"/resourcegroups/\",resourceGroupName), \"Not associated to a Resource Group\")\r\n| summarize BillableData = sum(BillableData)/1.E9 by resourceGroupId, subscriptionId\r\n| extend Cost = round((BillableData * toreal({Price})),2)\r\n| order by BillableData desc",
+              "size": 0,
+              "showAnalytics": true,
+              "timeContext": {
+                "durationMs": 0
+              },
+              "timeContextFromParameter": "TimeRange",
+              "exportFieldName": "resourceGroupId",
+              "exportParameterName": "selectedResourceGroupId",
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "$gen_group",
+                    "formatter": 13,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "_ResourceId",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "BillableData",
+                    "formatter": 4,
+                    "formatOptions": {
+                      "palette": "blue",
+                      "aggregation": "Sum"
+                    },
+                    "numberFormat": {
+                      "unit": 39,
+                      "options": {
+                        "style": "decimal",
+                        "useGrouping": false,
+                        "minimumFractionDigits": 2,
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "resourceGroupName",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "resourceGroupId",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "Cost",
+                    "formatter": 1,
+                    "formatOptions": {
+                      "aggregation": "Sum"
+                    },
+                    "numberFormat": {
+                      "unit": 0,
+                      "options": {
+                        "currency": "USD",
+                        "style": "currency",
+                        "useGrouping": true,
+                        "minimumFractionDigits": 2,
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  }
+                ],
+                "rowLimit": 10000,
+                "filter": true,
+                "hierarchySettings": {
+                  "treeType": 1,
+                  "groupBy": [
+                    "subscriptionId"
+                  ],
+                  "finalBy": "resourceGroupId"
+                }
+              }
+            },
+            "customWidth": "50",
+            "showPin": true,
+            "name": "By Resource - Subscription/ResourceGroup",
+            "styleSettings": {
+              "margin": "5px",
+              "maxWidth": "50%",
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "find where TimeGenerated {TimeRange} and _ResourceId has \"{selectedResourceGroupId}\" project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == true \r\n| summarize BillableData = sum(_BilledSize/1000000000) by _ResourceId | sort by BillableData nulls last\r\n| extend Cost = round((BillableData * toreal({Price})),2)\r\n| extend ResourceType = _ResourceId\r\n| project _ResourceId, ResourceType, BillableData, Cost\r\n//| project subscriptionId, resourceGroupId, resourceGroupName, BillableData, Cost",
+              "size": 0,
+              "showAnalytics": true,
+              "noDataMessage": "Select a Resource Group from the left hand grid",
+              "timeContext": {
+                "durationMs": 604800000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "ResourceType",
+                    "formatter": 16,
+                    "formatOptions": {
+                      "showIcon": true,
+                      "customColumnWidthSetting": "25.1429ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "BillableData",
+                    "formatter": 4,
+                    "formatOptions": {
+                      "palette": "blue"
+                    },
+                    "numberFormat": {
+                      "unit": 39,
+                      "options": {
+                        "style": "decimal",
+                        "useGrouping": true,
+                        "minimumFractionDigits": 2,
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "Cost",
+                    "formatter": 1,
+                    "numberFormat": {
+                      "unit": 0,
+                      "options": {
+                        "currency": "USD",
+                        "style": "currency",
+                        "useGrouping": true,
+                        "minimumFractionDigits": 2,
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  }
+                ],
+                "rowLimit": 1000,
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "showPin": true,
+            "name": "By Resource - Filtered to Resource Group ",
+            "styleSettings": {
+              "margin": "5px",
+              "maxWidth": "50%",
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "TabSelection",
+        "comparison": "isEqualTo",
+        "value": "By Resource"
+      },
+      "name": "By Resource Group"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "find where TimeGenerated {TimeRange} project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == \"True\" \r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"No Resource Type\")\r\n| summarize BilledSize_GB = (sum(_BilledSize) / 1.E9) by ResourceType\r\n| extend Cost =  round(toreal(BilledSize_GB * toint({Price})),2)\r\n| order by BilledSize_GB desc\r\n\r\n\r\n",
+              "size": 0,
+              "timeContext": {
+                "durationMs": 5184000000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "exportFieldName": "ResourceType",
+              "exportParameterName": "selectedResourceType",
+              "exportDefaultValue": "All",
+              "showExportToExcel": true,
+              "exportToExcelOptions": "all",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "visualization": "tiles",
+              "tileSettings": {
+                "titleContent": {
+                  "columnMatch": "ResourceType",
+                  "formatter": 16,
+                  "formatOptions": {
+                    "showIcon": true
+                  }
+                },
+                "leftContent": {
+                  "columnMatch": "Cost",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 0,
+                    "options": {
+                      "currency": "GBP",
+                      "style": "currency"
+                    }
+                  }
+                },
+                "secondaryContent": {
+                  "columnMatch": "BilledSize_GB",
+                  "formatter": 1,
+                  "numberFormat": {
+                    "unit": 5,
+                    "options": {
+                      "style": "decimal",
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                },
+                "showBorder": false
+              }
+            },
+            "name": "query - Total Cost Tile"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n| where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| summarize TotalBilledByResource = sum(_BilledSize) by _ResourceId, ResourceType\r\n| summarize\r\n    TotalBilledSize = sum(TotalBilledByResource),\r\n    AverageByResource = avg(TotalBilledByResource),\r\n    NumberOfResources = count(_ResourceId)\r\n    by ResourceType\r\n| extend Cost =  round(toreal((TotalBilledSize / 1.E9) * toint(Price)), 2)\r\n| order by TotalBilledSize desc\r\n\r\n\r\n",
+              "size": 0,
+              "showAnalytics": true,
+              "timeContext": {
+                "durationMs": 5184000000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "showRefreshButton": true,
+              "exportFieldName": "ResourceType",
+              "exportParameterName": "selectedResourceType",
+              "exportDefaultValue": "All",
+              "showExportToExcel": true,
+              "exportToExcelOptions": "all",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "ResourceType",
+                    "formatter": 16,
+                    "formatOptions": {
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "TotalBilledSize",
+                    "formatter": 4,
+                    "formatOptions": {
+                      "palette": "blue",
+                      "aggregation": "Average"
+                    },
+                    "numberFormat": {
+                      "unit": 2,
+                      "options": {
+                        "style": "decimal",
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "AverageByResource",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "palette": "blue"
+                    },
+                    "numberFormat": {
+                      "unit": 2,
+                      "options": {
+                        "style": "decimal"
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "Cost",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "palette": "red",
+                      "aggregation": "Sum"
+                    },
+                    "numberFormat": {
+                      "unit": 0,
+                      "options": {
+                        "currency": "GBP",
+                        "style": "currency"
+                      }
+                    }
+                  }
+                ],
+                "rowLimit": 500,
+                "filter": true,
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_bar_TotalBilledSize_1",
+                    "sortOrder": 2
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_bar_TotalBilledSize_1",
+                  "sortOrder": 2
+                }
+              ]
+            },
+            "name": "query - 1 - Copy - Copy"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable, TimeGenerated\r\n| where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n    | where _IsBillable == \"True\"\r\n    | extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| make-series BilledSize = sum(_BilledSize) default = 0 on TimeGenerated from StartTime to EndTime step TimeGranularity by ResourceType\r\n| project ResourceType, BilledSize, TimeGenerated\r\n\r\n",
+              "size": 0,
+              "timeContext": {
+                "durationMs": 5184000000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "visualization": "timechart",
+              "chartSettings": {
+                "ySettings": {
+                  "numberFormatSettings": {
+                    "unit": 2,
+                    "options": {
+                      "style": "decimal",
+                      "useGrouping": true,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              }
+            },
+            "name": "query - 2"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nlet vData =  materialize(find where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n| where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n    | where _IsBillable == \"True\" \r\n    | summarize BilledSizeByResource = (sum(_BilledSize) / 1.E9) by _ResourceId\r\n    | extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n        _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n    );\r\nvData\r\n| summarize BilledSizeByResourceType = sum(BilledSizeByResource) by ResourceType\r\n| order by BilledSizeByResourceType desc\r\n| extend Ordered = row_number()\r\n| join kind = inner (\r\n    vData\r\n    | extend Cost =  round(toreal(BilledSizeByResource * toint(Price)), 2)\r\n    )\r\n    on ResourceType\r\n| order by Ordered asc, BilledSizeByResource desc\r\n| project ResourceType, _ResourceId, Cost, BilledSize = BilledSizeByResource\r\n| join kind = inner (\r\n    find where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable, TimeGenerated\r\n   | where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n        | where _IsBillable == \"True\"\r\n    | make-series BilledSizeByResource_Series = sum(_BilledSize) default = 0 on TimeGenerated from StartTime to EndTime step TimeGranularity by _ResourceId\r\n      | extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n        _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n    | project _ResourceId, BilledSizeByResource_Series\r\n) on _ResourceId\r\n| project-away _ResourceId1\r\n",
+              "size": 0,
+              "showAnalytics": true,
+              "timeContext": {
+                "durationMs": 5184000000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "exportToExcelOptions": "all",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "$gen_group",
+                    "formatter": 16,
+                    "formatOptions": {
+                      "showIcon": true,
+                      "customColumnWidthSetting": "32.2857ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "ResourceType",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "_ResourceId",
+                    "formatter": 13,
+                    "formatOptions": {
+                      "linkTarget": "Resource",
+                      "showIcon": false
+                    }
+                  },
+                  {
+                    "columnMatch": "Cost",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "palette": "red",
+                      "aggregation": "Sum"
+                    },
+                    "numberFormat": {
+                      "unit": 0,
+                      "options": {
+                        "currency": "GBP",
+                        "style": "currency"
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "BilledSize",
+                    "formatter": 4,
+                    "formatOptions": {
+                      "palette": "blue",
+                      "aggregation": "Average"
+                    },
+                    "numberFormat": {
+                      "unit": 5,
+                      "options": {
+                        "style": "decimal",
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "BilledSizeByResource_Series",
+                    "formatter": 21,
+                    "formatOptions": {
+                      "min": 0,
+                      "palette": "blue",
+                      "aggregation": "Sum"
+                    }
+                  }
+                ],
+                "rowLimit": 500,
+                "filter": true,
+                "hierarchySettings": {
+                  "treeType": 1,
+                  "groupBy": [
+                    "ResourceType"
+                  ],
+                  "finalBy": "_ResourceId"
+                }
+              }
+            },
+            "conditionalVisibility": {
+              "parameterName": "selectedResourceType",
+              "comparison": "isNotEqualTo",
+              "value": "All"
+            },
+            "name": "query - 1 - Copy"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "crossComponentResources": [
+                "{Subscription}"
+              ],
+              "parameters": [
+                {
+                  "id": "b9907d24-798e-4f47-9ffb-2eb6052ae3db",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "TotalCountOfResources",
+                  "type": 2,
+                  "isRequired": true,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "query": "resources\r\n| summarize count() by ['type']\r\n| project value = strcat(type,\",\",count_)",
+                  "crossComponentResources": [
+                    "{Subscription}"
+                  ],
+                  "isHiddenWhenLocked": true,
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ],
+                    "showDefault": false
+                  },
+                  "timeContext": {
+                    "durationMs": 86400000
+                  },
+                  "defaultValue": "value::all",
+                  "queryType": 1,
+                  "resourceType": "microsoft.resourcegraph/resources"
+                }
+              ],
+              "style": "pills",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources"
+            },
+            "name": "parameters - 6"
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "## Note\r\n\r\nThis chart only shows data avaliable to the logged in account. If you do not have the permissions to read the relevant data from the workspace or Azure Resource Graph, then the data reflected may be inaccurate.\r\n\r\nAlso data shown may reflect resources that no longer exist, but data still resides in the Log Analytics workspace",
+              "style": "info"
+            },
+            "name": "text - 6"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let ResourceGraph = print p = pack_array({TotalCountOfResources})\r\n    | mv-expand p\r\n    | project ResourceType = tostring(split(p, \",\")[0]),\r\n        ARGCount = toint(split(p, \",\")[1]);\r\nlet StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == \"True\"\r\n| where \"All\" == \"All\" or _ResourceId has \"All\"\r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| extend shortResourceId = iif (indexof(_ResourceId, '/',0,-1,9) < 0, _ResourceId, substring(_ResourceId,0, indexof(_ResourceId, '/',0,-1,9)))\r\n| summarize TotalBilledByResource = sum(_BilledSize) by shortResourceId, ResourceType\r\n| summarize\r\n    TotalBilledSize = sum(TotalBilledByResource),\r\n    AverageByResource = avg(TotalBilledByResource),\r\n    NumberOfResources = count(shortResourceId)\r\n    by ResourceType\r\n| extend Cost =  round(toreal((TotalBilledSize / 1.E9) * toint(Price)), 2)\r\n| order by TotalBilledSize desc\r\n| join kind =leftouter (\r\n    ResourceGraph\r\n    )\r\n    on ResourceType\r\n| project-away ResourceType1\r\n| extend estimatedBilledSizeByTotalResources = ARGCount * AverageByResource\r\n| extend estimatedCost = round(toreal((estimatedBilledSizeByTotalResources / 1.E9) * toint(Price)), 2)\r\n| project ResourceType, AverageByResource, estimateByResource = estimatedBilledSizeByTotalResources, ['# of Resources'] = NumberOfResources, ['# of Resources(ARM)'] = ARGCount, Cost, estimatedCost\r\n\r\n\r\n\r\n",
+              "size": 0,
+              "timeContext": {
+                "durationMs": 5184000000
+              },
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "ResourceType",
+                    "formatter": 16,
+                    "formatOptions": {
+                      "showIcon": true,
+                      "customColumnWidthSetting": "27.5714ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "AverageByResource",
+                    "formatter": 1,
+                    "numberFormat": {
+                      "unit": 2,
+                      "options": {
+                        "style": "decimal",
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "# of Resources",
+                    "formatter": 1
+                  },
+                  {
+                    "columnMatch": "# of Resources(ARM)",
+                    "formatter": 1
+                  },
+                  {
+                    "columnMatch": "Cost",
+                    "formatter": 0,
+                    "numberFormat": {
+                      "unit": 0,
+                      "options": {
+                        "currency": "GBP",
+                        "style": "currency"
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "TotalBilledSize",
+                    "formatter": 1,
+                    "numberFormat": {
+                      "unit": 2,
+                      "options": {
+                        "style": "decimal",
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "estimatedBilledSizeByTotalResources",
+                    "formatter": 0,
+                    "numberFormat": {
+                      "unit": 2,
+                      "options": {
+                        "style": "decimal",
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "estimatedCostByTotalResources",
+                    "formatter": 1,
+                    "numberFormat": {
+                      "unit": 0,
+                      "options": {
+                        "currency": "GBP",
+                        "style": "currency"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "name": "query - 5"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "TabSelection",
+        "comparison": "isEqualTo",
+        "value": "By Resource Type"
+      },
+      "name": "By Resource Type"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
