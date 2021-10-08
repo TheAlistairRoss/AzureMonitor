@@ -19,7 +19,7 @@
             "crossComponentResources": [
               "value::selected"
             ],
-            "value": [],
+            "value":[],
             "typeSettings": {
               "additionalResourceOptions": [
                 "value::all"
@@ -600,7 +600,7 @@
               "query": "find where TimeGenerated {TimeRange} project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == \"True\" \r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"No Resource Type\")\r\n| summarize BilledSize_GB = (sum(_BilledSize) / 1.E9) by ResourceType\r\n| extend Cost =  round(toreal(BilledSize_GB * toint({Price})),2)\r\n| order by BilledSize_GB desc\r\n\r\n\r\n",
               "size": 0,
               "timeContext": {
-                "durationMs": 5184000000
+                "durationMs": 0
               },
               "timeContextFromParameter": "TimeRange",
               "exportFieldName": "ResourceType",
@@ -656,11 +656,11 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n| where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| summarize TotalBilledByResource = sum(_BilledSize) by _ResourceId, ResourceType\r\n| summarize\r\n    TotalBilledSize = sum(TotalBilledByResource),\r\n    AverageByResource = avg(TotalBilledByResource),\r\n    NumberOfResources = count(_ResourceId)\r\n    by ResourceType\r\n| extend Cost =  round(toreal((TotalBilledSize / 1.E9) * toint(Price)), 2)\r\n| order by TotalBilledSize desc\r\n\r\n\r\n",
+              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == \"True\"\r\n| where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| extend shortResourceId = iif (indexof(_ResourceId, '/',0,-1,9) < 0, _ResourceId, substring(_ResourceId,0, indexof(_ResourceId, '/',0,-1,9)))\r\n| summarize TotalBilledByResource = sum(_BilledSize) by shortResourceId, ResourceType\r\n| summarize\r\n    TotalBilledSize = sum(TotalBilledByResource),\r\n    AverageByResource = avg(TotalBilledByResource),\r\n    NumberOfResources = count(shortResourceId)\r\n    by ResourceType\r\n| extend Cost =  round(toreal((TotalBilledSize / 1.E9) * toint(Price)), 2)\r\n| order by TotalBilledSize desc\r\n\r\n\r\n",
               "size": 0,
               "showAnalytics": true,
               "timeContext": {
-                "durationMs": 5184000000
+                "durationMs": 0
               },
               "timeContextFromParameter": "TimeRange",
               "showRefreshButton": true,
@@ -731,14 +731,14 @@
                 "filter": true,
                 "sortBy": [
                   {
-                    "itemKey": "$gen_bar_TotalBilledSize_1",
+                    "itemKey": "NumberOfResources",
                     "sortOrder": 2
                   }
                 ]
               },
               "sortBy": [
                 {
-                  "itemKey": "$gen_bar_TotalBilledSize_1",
+                  "itemKey": "NumberOfResources",
                   "sortOrder": 2
                 }
               ]
@@ -749,10 +749,10 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable, TimeGenerated\r\n| where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n    | where _IsBillable == \"True\"\r\n    | extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| make-series BilledSize = sum(_BilledSize) default = 0 on TimeGenerated from StartTime to EndTime step TimeGranularity by ResourceType\r\n| project ResourceType, BilledSize, TimeGenerated\r\n\r\n",
+              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable, TimeGenerated\r\n| where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n| where _IsBillable == \"True\"\r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| make-series BilledSize = sum(_BilledSize) default = 0 on TimeGenerated from StartTime to EndTime step TimeGranularity by ResourceType\r\n| project ResourceType, BilledSize, TimeGenerated\r\n\r\n",
               "size": 0,
               "timeContext": {
-                "durationMs": 5184000000
+                "durationMs": 0
               },
               "timeContextFromParameter": "TimeRange",
               "queryType": 0,
@@ -780,11 +780,11 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nlet vData =  materialize(find where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n| where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n    | where _IsBillable == \"True\" \r\n    | summarize BilledSizeByResource = (sum(_BilledSize) / 1.E9) by _ResourceId\r\n    | extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n        _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n    );\r\nvData\r\n| summarize BilledSizeByResourceType = sum(BilledSizeByResource) by ResourceType\r\n| order by BilledSizeByResourceType desc\r\n| extend Ordered = row_number()\r\n| join kind = inner (\r\n    vData\r\n    | extend Cost =  round(toreal(BilledSizeByResource * toint(Price)), 2)\r\n    )\r\n    on ResourceType\r\n| order by Ordered asc, BilledSizeByResource desc\r\n| project ResourceType, _ResourceId, Cost, BilledSize = BilledSizeByResource\r\n| join kind = inner (\r\n    find where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable, TimeGenerated\r\n   | where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n        | where _IsBillable == \"True\"\r\n    | make-series BilledSizeByResource_Series = sum(_BilledSize) default = 0 on TimeGenerated from StartTime to EndTime step TimeGranularity by _ResourceId\r\n      | extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n        _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n    | project _ResourceId, BilledSizeByResource_Series\r\n) on _ResourceId\r\n| project-away _ResourceId1\r\n",
+              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nlet vData =  materialize(find where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n    | where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n    | where _IsBillable == \"True\" \r\n    | summarize BilledSizeByResource = (sum(_BilledSize) / 1.E9) by _ResourceId\r\n    | extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n        _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n    | extend shortResourceId = iif (indexof(_ResourceId, '/', 0, -1, 9) < 0, _ResourceId, substring(_ResourceId, 0, indexof(_ResourceId, '/', 0, -1, 9)))\r\n    );\r\nvData\r\n| summarize BilledSizeByResourceType = sum(BilledSizeByResource) by ResourceType\r\n| order by BilledSizeByResourceType desc\r\n| extend Ordered = row_number()\r\n| join kind = innerunique (\r\n    vData\r\n    | extend Cost =  round(toreal(BilledSizeByResource * toint(Price)), 2)\r\n    )\r\n    on ResourceType\r\n| order by Ordered asc, BilledSizeByResource desc\r\n| project ResourceType, shortResourceId, Cost, BilledSize = BilledSizeByResource\r\n| join kind = innerunique (\r\n    find where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable, TimeGenerated\r\n    | where \"{selectedResourceType}\" == \"All\" or _ResourceId has \"{selectedResourceType}\"\r\n    | where _IsBillable == \"True\"\r\n    | extend _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n    | extend shortResourceId = iif (indexof(_ResourceId, '/', 0, -1, 9) < 0, _ResourceId, substring(_ResourceId, 0, indexof(_ResourceId, '/', 0, -1, 9)))\r\n    | make-series BilledSizeByResource_Series = sum(_BilledSize) default = 0 on TimeGenerated from StartTime to EndTime step TimeGranularity by shortResourceId\r\n    | project shortResourceId, BilledSizeByResource_Series\r\n    )\r\n    on shortResourceId\r\n| project-away shortResourceId1\r\n\r\n",
               "size": 0,
               "showAnalytics": true,
               "timeContext": {
-                "durationMs": 5184000000
+                "durationMs": 0
               },
               "timeContextFromParameter": "TimeRange",
               "showRefreshButton": true,
@@ -929,10 +929,10 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let ResourceGraph = print p = pack_array({TotalCountOfResources})\r\n    | mv-expand p\r\n    | project ResourceType = tostring(split(p, \",\")[0]),\r\n        ARGCount = toint(split(p, \",\")[1]);\r\nlet StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == \"True\"\r\n| where \"All\" == \"All\" or _ResourceId has \"All\"\r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| extend shortResourceId = iif (indexof(_ResourceId, '/',0,-1,9) < 0, _ResourceId, substring(_ResourceId,0, indexof(_ResourceId, '/',0,-1,9)))\r\n| summarize TotalBilledByResource = sum(_BilledSize) by shortResourceId, ResourceType\r\n| summarize\r\n    TotalBilledSize = sum(TotalBilledByResource),\r\n    AverageByResource = avg(TotalBilledByResource),\r\n    NumberOfResources = count(shortResourceId)\r\n    by ResourceType\r\n| extend Cost =  round(toreal((TotalBilledSize / 1.E9) * toint(Price)), 2)\r\n| order by TotalBilledSize desc\r\n| join kind =leftouter (\r\n    ResourceGraph\r\n    )\r\n    on ResourceType\r\n| project-away ResourceType1\r\n| extend estimatedBilledSizeByTotalResources = ARGCount * AverageByResource\r\n| extend estimatedCost = round(toreal((estimatedBilledSizeByTotalResources / 1.E9) * toint(Price)), 2)\r\n| project ResourceType, AverageByResource, estimateByResource = estimatedBilledSizeByTotalResources, ['# of Resources'] = NumberOfResources, ['# of Resources(ARM)'] = ARGCount, Cost, estimatedCost\r\n\r\n\r\n\r\n",
+              "query": "let ResourceGraph = print p = pack_array({TotalCountOfResources})\r\n    | mv-expand p\r\n    | project ResourceType = tostring(split(p, \",\")[0]),\r\n        ARGCount = toint(split(p, \",\")[1]);\r\nlet StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nlet TimeGranularity = iif(datetime_diff(\"day\", EndTime, StartTime) <= 7, 1h, 1d);\r\nfind where TimeGenerated between(StartTime .. EndTime) project _ResourceId, _BilledSize, _IsBillable\r\n| where _IsBillable == \"True\"\r\n| where \"All\" == \"All\" or _ResourceId has \"All\"\r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    _ResourceId = iif(isempty(_ResourceId), \"Not associated to a resource\", _ResourceId)\r\n| extend shortResourceId = iif (indexof(_ResourceId, '/',0,-1,9) < 0, _ResourceId, substring(_ResourceId,0, indexof(_ResourceId, '/',0,-1,9)))\r\n| summarize TotalBilledByResource = sum(_BilledSize) by shortResourceId, ResourceType\r\n| summarize\r\n    TotalBilledSize = sum(TotalBilledByResource),\r\n    AverageByResource = avg(TotalBilledByResource),\r\n    NumberOfResources = count(shortResourceId)\r\n    by ResourceType\r\n| extend Cost =  round(toreal((TotalBilledSize / 1.E9) * toint(Price)), 2)\r\n| order by TotalBilledSize desc\r\n| join kind =leftouter (\r\n    ResourceGraph\r\n    )\r\n    on ResourceType\r\n| project-away ResourceType1\r\n| extend estimatedBilledSizeByTotalResources = ARGCount * AverageByResource\r\n| extend estimatedCost = round(toreal((estimatedBilledSizeByTotalResources / 1.E9) * toint(Price)), 2)\r\n| project ResourceType, ['Avg By Resource'] = AverageByResource, ['Estimate By Resource'] = estimatedBilledSizeByTotalResources, ['# of Resources'] = NumberOfResources, ['# of Resources(ARM)'] = ARGCount, Cost, ['Estimated Cost'] = estimatedCost\r\n\r\n\r\n\r\n",
               "size": 0,
               "timeContext": {
-                "durationMs": 5184000000
+                "durationMs": 0
               },
               "timeContextFromParameter": "TimeRange",
               "queryType": 0,
@@ -951,7 +951,18 @@
                     }
                   },
                   {
-                    "columnMatch": "AverageByResource",
+                    "columnMatch": "Avg By Resource",
+                    "formatter": 1,
+                    "numberFormat": {
+                      "unit": 2,
+                      "options": {
+                        "style": "decimal",
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "Estimate By Resource",
                     "formatter": 1,
                     "numberFormat": {
                       "unit": 2,
@@ -971,7 +982,7 @@
                   },
                   {
                     "columnMatch": "Cost",
-                    "formatter": 0,
+                    "formatter": 1,
                     "numberFormat": {
                       "unit": 0,
                       "options": {
@@ -981,29 +992,7 @@
                     }
                   },
                   {
-                    "columnMatch": "TotalBilledSize",
-                    "formatter": 1,
-                    "numberFormat": {
-                      "unit": 2,
-                      "options": {
-                        "style": "decimal",
-                        "maximumFractionDigits": 2
-                      }
-                    }
-                  },
-                  {
-                    "columnMatch": "estimatedBilledSizeByTotalResources",
-                    "formatter": 0,
-                    "numberFormat": {
-                      "unit": 2,
-                      "options": {
-                        "style": "decimal",
-                        "maximumFractionDigits": 2
-                      }
-                    }
-                  },
-                  {
-                    "columnMatch": "estimatedCostByTotalResources",
+                    "columnMatch": "Estimated Cost",
                     "formatter": 1,
                     "numberFormat": {
                       "unit": 0,
@@ -1013,8 +1002,20 @@
                       }
                     }
                   }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "# of Resources",
+                    "sortOrder": 2
+                  }
                 ]
-              }
+              },
+              "sortBy": [
+                {
+                  "itemKey": "# of Resources",
+                  "sortOrder": 2
+                }
+              ]
             },
             "name": "query - 5"
           }
