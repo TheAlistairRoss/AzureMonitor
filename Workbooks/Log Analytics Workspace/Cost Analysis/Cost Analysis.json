@@ -19,9 +19,7 @@
             "crossComponentResources": [
               "value::selected"
             ],
-            "value": [
-              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f"
-            ],
+            "value": [],
             "typeSettings": {
               "additionalResourceOptions": [
                 "value::all"
@@ -47,11 +45,7 @@
             "crossComponentResources": [
               "{Subscription}"
             ],
-            "value": [
-              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/soc/providers/microsoft.operationalinsights/workspaces/cybersecuritysoc",
-              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/SOC/providers/Microsoft.OperationalInsights/workspaces/CyberSecuritySoc",
-              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/SOC/providers/Microsoft.OperationalInsights/workspaces/CyberSecuritySOC"
-            ],
+            "value": [],
             "typeSettings": {
               "additionalResourceOptions": []
             },
