@@ -5,7 +5,7 @@
         "keyVaultResourceId": {
             "type": "string",
             "metadata": {
-                "description": "ResourceId of the Target Key Vault"
+                "description": "ResourceId of the Target Key Vault. This is used by the APIConnection Secret lookup and the Logic App in this example"
             }
         },
         "logicAppLookupSecretName": {
