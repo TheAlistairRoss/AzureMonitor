@@ -13,6 +13,7 @@ Connect-AzAccount
     -APIConnectionSecretName "Secret002" `
     -APIConnectionClientId "00000000-0000-0000-0000-000000000000" `
     -APIConnectionTenantId "00000000-0000-0000-0000-000000000000" `
-    -DisplayNamePrefix "Contoso"
+    -DisplayNamePrefix "Contoso" `
+    -TemplateFilePath "https://raw.githubusercontent.com/TheAlistairRoss/AzureMonitor/main/DeployLogicAppApiConnectionAndWorkbook/Template/template.json"
 
 ```
