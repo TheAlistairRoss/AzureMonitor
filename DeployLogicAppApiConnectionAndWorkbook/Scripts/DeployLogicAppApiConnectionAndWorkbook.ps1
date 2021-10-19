@@ -16,7 +16,9 @@ Param
     [String]
     $TemplateFilePath,
     [string]
-    $ResourceGroupName
+    $ResourceGroupName,
+    [string]
+    $TemplateFilePath 
 )
 
 ## Get Key Vault Secret
