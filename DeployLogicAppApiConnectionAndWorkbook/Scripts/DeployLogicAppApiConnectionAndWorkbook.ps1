@@ -1,7 +1,6 @@
 [CmdletBinding()]
 Param
 (
-    
     [String]
     $KeyVaultResourceId,
     [String]
