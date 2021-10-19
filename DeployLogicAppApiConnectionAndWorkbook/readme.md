@@ -10,13 +10,16 @@ The aim of these ARM templates is to deploy the following resources
 
 ## Prerequisites
 
-1. Azure AD App Registration with a Client Secret https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app
+1. Azure AD App registration with a Client Secret https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app
 
 2. Azure Key Vault
     
-    - This will require
+    - This will require two Secrets stored within
+        - One for the apiConnectionSecret. This is the Azure AD App registration secret from step 1
+        - A random string from the logicAppLookupSecretName
+    - Ensure the account deploying this template has permissions to read the secret values.
 
-3. A Resource group to deploy the resources to. Does not have to be the same as the Key Vault
+3. A Resource group to deploy the resources to. This does not have to be the same as the Key Vault
 
 ## Deploy
 
