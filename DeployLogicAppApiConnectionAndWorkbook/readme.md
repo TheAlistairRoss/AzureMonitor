@@ -38,5 +38,5 @@ Ensure you have the following parameters:
 - apiConnectionTenantId - This is the tenant Id hosting the App Registration
 - displayNamePrefix - a Prefix for all the resources deployed
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https%3A%2F%2Fraw.githubusercontent.com%2FTheAlistairRoss%2FAzureMonitor%2Fmain%2FDeployLogicAppApiConnectionAndWorkbook%2FPassSecretAsSecureString%2Ftemplate.json
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https%3A%2F%2Fgithub.com%2FTheAlistairRoss%2FAzureMonitor%2Fblob%2Fmain%2FDeployLogicAppApiConnectionAndWorkbook%2FTemplate%2Ftemplate.json
 )
