@@ -18,15 +18,6 @@ The aim of these ARM templates is to deploy the following resources
 
 3. A Resource group to deploy the resources to. Does not have to be the same as the Key Vault
 
-#### Pros
-- Requires the secret to be passed to the template deployment at run time
-- Ideal for CI/CD Pipelines which will look the value up and pass the parameter at time of deployment
-
-#### Con
-- Requires lookup of the secure string prior to deployment. 
-- If deploying manually, the user will need access to the secret to paste in.
-- 
-
 ## Deploy
 
 Ensure you have the following parameters:
