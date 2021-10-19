@@ -14,25 +14,9 @@ The aim of these ARM templates is to deploy the following resources
 
 2. Azure Key Vault
     
-    - If using the NestedTemplateForSecret Example, then ensure the Key Vault is enabled for ARM Template deployments and store the Secret that will be used by the API Connection in the Key Vault
-
-    - If using the PassSecretAsSecureString, only additional secrets are required to be stored.
+    - This will require
 
 3. A Resource group to deploy the resources to. Does not have to be the same as the Key Vault
-
-
-## Pros and Cons
-
-### **NestedTemplateForSecret**
-
-#### Pros
-- Does not require knowledge of the secret value beforehand as it will look it up from Key Vault
-
-#### Cons
-- Nested Deployment will return the value in plain text, so secure the ability to read deployments
-
-
-### **PassSecretAsSecureString**
 
 #### Pros
 - Requires the secret to be passed to the template deployment at run time
@@ -41,3 +25,18 @@ The aim of these ARM templates is to deploy the following resources
 #### Con
 - Requires lookup of the secure string prior to deployment. 
 - If deploying manually, the user will need access to the secret to paste in.
+- 
+
+## Deploy
+
+Ensure you have the following parameters:
+
+- keyVaultResourceId
+- logicAppLookupSecretName - This is the secret that the Logic App will look up. For Testing create a secret with any text as the value
+- apiConnectionSecret - This is the App Registration Secret
+- apiConnectionClientId - This is the App Registration Client Id
+- apiConnectionTenantId - This is the tenant Id hosting the App Registration
+- displayNamePrefix - a Prefix for all the resources deployed
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https%3A%2F%2Fraw.githubusercontent.com%2FTheAlistairRoss%2FAzureMonitor%2Fmain%2FDeployLogicAppApiConnectionAndWorkbook%2FPassSecretAsSecureString%2Ftemplate.json
+)
