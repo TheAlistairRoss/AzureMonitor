@@ -112,30 +112,6 @@
             "timeContext": {
               "durationMs": 86400000
             }
-          },
-          {
-            "id": "6aeba22e-53c2-4275-b16f-c24cf79f5cb2",
-            "version": "KqlParameterItem/1.0",
-            "name": "SubscriptionLookup",
-            "label": "Subscription Lookup",
-            "type": 6,
-            "isRequired": true,
-            "multiSelect": true,
-            "quote": "'",
-            "delimiter": ",",
-            "typeSettings": {
-              "additionalResourceOptions": [
-                "value::1",
-                "value::10",
-                "value::all"
-              ],
-              "includeAll": false,
-              "showDefault": false
-            },
-            "timeContext": {
-              "durationMs": 86400000
-            },
-            "defaultValue": "value::all"
           }
         ],
         "style": "pills",
