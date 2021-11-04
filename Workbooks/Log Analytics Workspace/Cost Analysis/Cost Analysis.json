@@ -19,7 +19,8 @@
             "crossComponentResources": [
               "value::selected"
             ],
-            "value": [],
+            "value": [          
+            ],
             "typeSettings": {
               "additionalResourceOptions": [
                 "value::all"
@@ -566,8 +567,9 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "find where TimeGenerated {TimeRange}  and _IsBillable == \"True\" project _ResourceId, _BilledSize\r\n//| where _IsBillable == \"True\" \r\n| extend SubscriptionId = tolower(split(_ResourceId, '/', 2)[0])\r\n| extend ResourceType = iif(isnotempty(_ResourceId), tolower(strcat(split(_ResourceId, '/', 6)[0], \"/\", split(_ResourceId, '/', 7)[0])), \"No Resource Type\")\r\n| summarize BilledSize_GB = (sum(_BilledSize) / 1.E9) by ResourceType\r\n| extend Cost =  round(toreal(BilledSize_GB * toint({Price})), 2)\r\n| order by BilledSize_GB desc\r\n\r\n\r\n",
+              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nfind where TimeGenerated between(StartTime .. EndTime) and _IsBillable == \"True\" project _ResourceId, _BilledSize\r\n| extend shortResourceId = iif (indexof(_ResourceId, '/',0,-1,9) < 0, _ResourceId, substring(_ResourceId,0, indexof(_ResourceId, '/',0,-1,9)))\r\n| summarize TotalBilledByResource = sum(_BilledSize) by shortResourceId\r\n| extend ResourceType = iif(isnotempty(shortResourceId), tolower(strcat(split(shortResourceId, '/', 6)[0], \"/\", split(shortResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    shortResourceId = iif(isempty(shortResourceId), \"Not associated to a resource\", shortResourceId)\r\n| summarize\r\n    TotalBilledSize = sum(TotalBilledByResource),\r\n    AverageByResource = avg(TotalBilledByResource),\r\n    NumberOfResources = count(shortResourceId)\r\n    by ResourceType\r\n| extend Cost =  round(toreal((TotalBilledSize / 1.E9) * toint(Price)), 3)\r\n| order by TotalBilledSize desc\r\n\r\n",
               "size": 0,
+              "showAnalytics": true,
               "timeContext": {
                 "durationMs": 0
               },
@@ -575,9 +577,7 @@
               "showRefreshButton": true,
               "exportFieldName": "ResourceType",
               "exportParameterName": "selectedResourceType",
-              "exportDefaultValue": "All",
               "showExportToExcel": true,
-              "exportToExcelOptions": "all",
               "queryType": 0,
               "resourceType": "microsoft.operationalinsights/workspaces",
               "crossComponentResources": [
@@ -599,21 +599,26 @@
                     "palette": "auto"
                   },
                   "numberFormat": {
-                    "unit": 0,
+                    "unit": 17,
                     "options": {
                       "currency": "GBP",
-                      "style": "currency"
+                      "style": "currency",
+                      "minimumFractionDigits": 3,
+                      "maximumFractionDigits": 3
                     }
                   }
                 },
                 "secondaryContent": {
-                  "columnMatch": "BilledSize_GB",
-                  "formatter": 1,
+                  "columnMatch": "TotalBilledSize",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "none"
+                  },
                   "numberFormat": {
-                    "unit": 5,
+                    "unit": 2,
                     "options": {
                       "style": "decimal",
-                      "maximumFractionDigits": 2
+                      "maximumSignificantDigits": 3
                     }
                   }
                 },
@@ -626,13 +631,8 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let StartTime = datetime(\"{TimeRange:startISO}\");\r\nlet EndTime = datetime(\"{TimeRange:endISO}\");\r\nlet Price = {Price};\r\nfind where TimeGenerated between(StartTime .. EndTime) and _IsBillable == \"True\" project _ResourceId, _BilledSize\r\n| extend shortResourceId = iif (indexof(_ResourceId, '/',0,-1,9) < 0, _ResourceId, substring(_ResourceId,0, indexof(_ResourceId, '/',0,-1,9)))\r\n| summarize TotalBilledByResource = sum(_BilledSize) by shortResourceId\r\n| extend ResourceType = iif(isnotempty(shortResourceId), tolower(strcat(split(shortResourceId, '/', 6)[0], \"/\", split(shortResourceId, '/', 7)[0])), \"Not associated to a resource type\"),\r\n    shortResourceId = iif(isempty(shortResourceId), \"Not associated to a resource\", shortResourceId)\r\n| where \"{selectedResourceType}\" == \"All\" or ResourceType in (\"{selectedResourceType}\")\r\n| summarize\r\n    TotalBilledSize = sum(TotalBilledByResource),\r\n    AverageByResource = avg(TotalBilledByResource),\r\n    NumberOfResources = count(shortResourceId)\r\n    by ResourceType\r\n| extend Cost =  round(toreal((TotalBilledSize / 1.E9) * toint(Price)), 3)\r\n| order by TotalBilledSize desc\r\n\r\n",
+              "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"f3e624f1-e202-4b08-ada5-1f90efe523f8\",\"mergeType\":\"table\",\"leftTable\":\"query - Total Cost Tile\"}],\"projectRename\":[{\"originalName\":\"[query - Total Cost Tile].ResourceType\",\"mergedName\":\"ResourceType\",\"fromId\":\"f3e624f1-e202-4b08-ada5-1f90efe523f8\"},{\"originalName\":\"[query - Total Cost Tile].TotalBilledSize\",\"mergedName\":\"TotalBilledSize\",\"fromId\":\"f3e624f1-e202-4b08-ada5-1f90efe523f8\"},{\"originalName\":\"[query - Total Cost Tile].AverageByResource\",\"mergedName\":\"AverageByResource\",\"fromId\":\"f3e624f1-e202-4b08-ada5-1f90efe523f8\"},{\"originalName\":\"[query - Total Cost Tile].NumberOfResources\",\"mergedName\":\"NumberOfResources\",\"fromId\":\"f3e624f1-e202-4b08-ada5-1f90efe523f8\"},{\"originalName\":\"[query - Total Cost Tile].Cost\",\"mergedName\":\"Cost\",\"fromId\":\"f3e624f1-e202-4b08-ada5-1f90efe523f8\"}]}",
               "size": 0,
-              "showAnalytics": true,
-              "timeContext": {
-                "durationMs": 0
-              },
-              "timeContextFromParameter": "TimeRange",
               "showRefreshButton": true,
               "exportMultipleValues": true,
               "exportedParameters": [
@@ -643,12 +643,7 @@
                 }
               ],
               "showExportToExcel": true,
-              "exportToExcelOptions": "all",
-              "queryType": 0,
-              "resourceType": "microsoft.operationalinsights/workspaces",
-              "crossComponentResources": [
-                "{Workspace}"
-              ],
+              "queryType": 7,
               "gridSettings": {
                 "formatters": [
                   {
@@ -704,7 +699,6 @@
                     }
                   }
                 ],
-                "rowLimit": 500,
                 "filter": true,
                 "sortBy": [
                   {
