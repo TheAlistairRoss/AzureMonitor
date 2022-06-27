@@ -1,0 +1,37 @@
+// LastSpecifiedDayOfMonth
+//
+// This function returns the date of the last specified day of a given month in the same year
+// This function requires two arguements. First is the MonthNumber 
+// Months are represented as an integer, with January being 1
+    // January = 1
+    // February = 2
+    // March = 3
+    // April = 4
+    // May = 5
+    // June = 6
+    // July = 7
+    // August = 8
+    // September = 9
+    // October = 10
+    // November = 11
+    // December = 12
+// The second arguement is WeekdayNumber
+// Days are also represented as an integer, with Sunday being the first day of the week, starting at 0
+    // Sunday = 0
+    // Monday = 1
+    // Tuesday = 2
+    // Wednesday = 3
+    // Thursday = 4
+    // Friday = 5
+    // Saturday = 6
+let LastSpecifiedDayOfMonth = (MonthNumber:int, WeekdayNumber:int){
+    let LastDayOfMonth = datetime_add("month",MonthNumber,startofyear(now())) -1d;
+    let Day = totimespan(strcat(WeekdayNumber,".00:00:00"));
+    iif(
+        Day <= dayofweek(LastDayOfMonth), 
+            startofweek(LastDayOfMonth) + Day ,
+            (startofweek(LastDayOfMonth) - 7d) + Day
+    )    
+};
+// This produces the last Sunday in March for the Current Year
+print LastSundayInMarch = LastSpecifiedDayOfMonth(3,0) 
