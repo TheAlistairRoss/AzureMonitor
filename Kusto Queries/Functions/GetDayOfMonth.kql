@@ -1,0 +1,42 @@
+// GetDayOfMonth
+// 
+// This function is comprised of three functions. Either of the Postive Lookahead or Negative Lookback can be used independently to return a specific day of the month.
+//
+// Positive Lookahead function
+// This looks for the Index of a specified day within a month
+// for example: PositiveDayOfMonth(2,4,5) would return the date of the 2nd Friday in April
+//
+let PositiveDayOfMonth = (Index:long, MonthNumber:int,DayNumber:int){
+    let DayOfWeek = totimespan(strcat(DayNumber,".00:00:00"));
+    let FirstDayOfMonth = datetime_add("month",MonthNumber - 1,startofyear(now()));
+    let AddDays = totimespan(strcat(((Index -1) * 7),".00:00:00"));
+    let Output = print Day = (startofweek(FirstDayOfMonth) + DayOfWeek)
+    | extend Day = iif (Day < FirstDayOfMonth, Day + 7d, Day)
+    | extend Day = Day + AddDays;
+    toscalar(Output)
+};
+// Negative Lookback function
+// This looks for the Index of a specified day within a month
+// for example: NegativeDayOfMonth(-1,4,5) would return the date of the last Friday in April
+//
+let NegativeDayOfMonth = (Index:long, MonthNumber:int,DayNumber:int){
+    let DayOfWeek = totimespan(strcat(DayNumber,".00:00:00"));
+    let LastDayOfMonth = datetime_add("month",MonthNumber,startofyear(now())) -1d;
+    let AddDays = totimespan(strcat(((Index + 1) * 7),".00:00:00"));
+    let Output = print Day = (startofweek(LastDayOfMonth) + DayOfWeek)
+    | extend Day = iif (Day > LastDayOfMonth, Day - 7d, Day)
+    | extend Day = Day + AddDays;
+    toscalar(Output)
+};
+// GetDayOfMonth function
+// This combines both functions to allow for postive or negative lookbacks
+// for example: GetDayOfMonth(2,4,5)
+//
+let GetDayOfMonth = (Index:long, MonthNumber:int,DayNumber:int){
+    let Output = iif (
+        (Index > 0),
+        PositiveDayOfMonth(Index,MonthNumber,DayNumber),
+        NegativeDayOfMonth(Index,MonthNumber,DayNumber)
+    );
+    toscalar(Output)
+};
