@@ -1,0 +1,7 @@
+EmailEvents
+| where isnotempty( ThreatTypes)
+| project ThreatTypes
+| extend ThreatTypes = split(ThreatTypes, ",")
+| mv-expand ThreatTypes to typeof(string)
+| extend ThreatTypes = trim(@'\W', ThreatTypes )
+| distinct ThreatTypes
