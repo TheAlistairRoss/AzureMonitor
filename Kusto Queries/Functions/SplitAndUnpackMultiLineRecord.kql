@@ -1,6 +1,6 @@
 // Split and unpack multi line records 
 //
-// This example gives an event that contains multiple records, that have key value paurs within a single event, spread across mutliple lines.
+// This example gives an event that contains multiple records, that have key value pairs within a single event, spread across mutliple lines.
 // This splits the records into unique events, then splits the key value pairs based on the records delimeter, then repacks it into a dynamic type. 
 // Finally it unpacks the bag, so all keys are now column names, for each unique event
 //
