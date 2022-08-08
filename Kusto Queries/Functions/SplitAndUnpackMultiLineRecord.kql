@@ -1,0 +1,30 @@
+// Split and unpack multi line records 
+//
+// This example gives an event that contains multiple records, that have key value paurs within a single event, spread across mutliple lines.
+// This splits the records into unique events, then splits the key value pairs based on the records delimeter, then repacks it into a dynamic type. 
+// Finally it unpacks the bag, so all keys are now column names, for each unique event
+//
+print EventId = 1, source = 
+ ```Reverse date time = 487930544
+ Sequence number = 2147488705
+ Component = BSS
+ Security event = FALSE
+ Event number = 2177
+ Event name = Export Configuration Completed
+ Reverse date time = 487930545
+ Sequence number = 2147488706
+ Component = BSS
+ Security event = FALSE
+ Event number = 2177
+ Event name = Export Configuration Completed
+ ```
+| extend source = split(source, "Reverse date time = ")
+| mv-expand with_itemindex=EventIdIndex source to typeof(string) 
+| where isnotempty(source)
+| extend source = strcat("Reverse date time = ", source)
+| extend source = split(source,"\n")
+| mv-expand source to typeof(string)
+| extend source = split(source," = ")
+| extend source = pack(tostring(source[0]),source[1])
+| summarize source = make_bag(source) by EventIdIndex, EventId
+| evaluate bag_unpack(source)
