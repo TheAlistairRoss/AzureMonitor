@@ -1,0 +1,30 @@
+// Split and parse multi line records 
+//
+// This example gives an event that contains multiple records, that have key value pairs within a single event, spread across mutliple lines.
+// This splits the records into unique events, then parses the records to the required column name and type
+//
+print source = 
+ ```Reverse date time = 487930544
+Sequence number = 2147488705
+Component = BSS
+Security event = FALSE
+Event number = 2177
+Event name = Export Configuration Completed
+Reverse date time = 487930545
+Sequence number = 2147488706
+Component = BSS
+Security event = FALSE
+Event number = 2177
+Event name = Export Configuration Completed
+ ```
+| extend source = split(source, "Reverse date time = ")
+| mv-expand source to typeof(string) 
+| where isnotempty(source)
+| extend source = strcat("Reverse date time = ", source)
+| parse source with  "Reverse date time = " ['Reverse date time']:long 
+"\nSequence number = " ['Sequence number']:long
+ "\nComponent = " Component:string
+ "\nSecurity event = " ['Security event']:bool
+ "\nEvent number = " ['Event number']:int
+ "\nEvent name = " ['Event name']:string
+| project-away source
