@@ -1,0 +1,108 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_test_name": {
+            "defaultValue": "test",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_test_name')]",
+            "location": "westeurope",
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "triggers": {
+                        "Recurrence": {
+                            "recurrence": {
+                                "frequency": "Week",
+                                "interval": 1,
+                                "schedule": {
+                                    "weekDays": [
+                                        "Tuesday"
+                                    ]
+                                }
+                            },
+                            "evaluatedRecurrence": {
+                                "frequency": "Week",
+                                "interval": 1,
+                                "schedule": {
+                                    "weekDays": [
+                                        "Tuesday"
+                                    ]
+                                }
+                            },
+                            "type": "Recurrence"
+                        }
+                    },
+                    "actions": {
+                        "Condition": {
+                            "actions": {
+                                "Terminate_-_Today_Is_the_Correct_Day": {
+                                    "runAfter": {},
+                                    "type": "Terminate",
+                                    "inputs": {
+                                        "runStatus": "Succeeded"
+                                    }
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "else": {
+                                "actions": {
+                                    "Terminate_-_Today_Isn't_the_Correct_Day": {
+                                        "runAfter": {},
+                                        "type": "Terminate",
+                                        "inputs": {
+                                            "runStatus": "Cancelled"
+                                        }
+                                    }
+                                }
+                            },
+                            "expression": {
+                                "and": [
+                                    {
+                                        "equals": [
+                                            "@if(equals(startOfDay(addDays(if(less(addDays(addDays(startOfMonth(utcNow()), int(concat('-',dayOfWeek(startOfMonth(utcNow()))))),int(variables('Constants').DayOfWeek)), startOfMonth(utcNow())),addDays(addDays(addDays(startOfMonth(utcNow()), int(concat('-',dayOfWeek(startOfMonth(utcNow()))))),int(variables('Constants').DayOfWeek)),7), addDays(addDays(startOfMonth(utcNow()), int(concat('-',dayOfWeek(startOfMonth(utcNow()))))), int(variables('Constants').DayOfWeek))),mul(add(int(variables('Constants').WeekOfMonth),-1),7))),\r\nstartOfDay(utcNow())),true,false)",
+                                            "@true"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "type": "If"
+                        },
+                        "Initialize_variable": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Constants",
+                                        "type": "object",
+                                        "value": {
+                                            "DayOfWeek": "2",
+                                            "WeekOfMonth": "2"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {}
+            }
+        }
+    ]
+}
