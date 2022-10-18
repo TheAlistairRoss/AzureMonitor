@@ -1,4 +1,4 @@
-# Azure Purge API via PowerShell using Invoke-WebRequest
+# Azure Log Analytics workspace purge via PowerShell using Invoke-WebRequest
 # https://learn.microsoft.com/en-us/azure/azure-monitor/logs/personal-data-mgmt#exporting-and-deleting-personal-data
 
 # Constants - Change these to reflect your environment
