@@ -1,5 +1,5 @@
 # Workspace Purge
 
-# Powershell Cmdlets Example
+### Powershell Cmdlets Example
 
-# Rest API (PowerShell) Example
+### Rest API (PowerShell) Example
