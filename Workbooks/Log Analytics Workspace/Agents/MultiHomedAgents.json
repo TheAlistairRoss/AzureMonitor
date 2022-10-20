@@ -1,0 +1,270 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscriptions}"
+        ],
+        "parameters": [
+          {
+            "id": "65939631-61fa-4a50-8704-5da99f40a018",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 300000
+                },
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ]
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": {
+              "durationMs": 3600000
+            }
+          },
+          {
+            "id": "fc4cf242-4ae3-43b5-9e86-33b7061e5aa6",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscriptions",
+            "type": 6,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "includeAll": false,
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "defaultValue": "value::all"
+          },
+          {
+            "id": "803ebf56-dcd4-4adb-af8b-4607c579b554",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspaces",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "resourcecontainers\r\n| where type == \"microsoft.resources/subscriptions\"\r\n| project subscriptionName = name, subscriptionId\r\n| join kind = innerunique(\r\n    resources\r\n    | where type =~ \"microsoft.operationalinsights/workspaces\"\r\n    | project workspaceId = id, workspaceName = name, subscriptionId\r\n) \r\non subscriptionId\r\n| project value = workspaceId, label = workspaceName, group = subscriptionName\r\n| order by group asc, label asc",
+            "crossComponentResources": [
+              "{Subscriptions}"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "defaultValue": "value::all",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "394e122c-c055-4b2a-a873-a50c2c086d21",
+            "version": "KqlParameterItem/1.0",
+            "name": "ComputerFilter",
+            "label": "Computer Name Filter",
+            "type": 1,
+            "description": "Filters Computers based on the start of the string. If left unset, it will return all devices"
+          }
+        ],
+        "style": "pills",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "name": "parameters - 0"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "Heartbeat\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| distinct Computer, TenantId\r\n| order by Computer asc",
+        "size": 0,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspaces}"
+        ],
+        "gridSettings": {
+          "rowLimit": 1000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "_",
+        "comparison": "isEqualTo",
+        "value": "_"
+      },
+      "name": "Query - Computer Details"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "resourcecontainers\r\n| where type == \"microsoft.resources/subscriptions\"\r\n| project subscriptionName = name, subscriptionId\r\n| join kind = innerunique(\r\n    resources\r\n    | where type =~ \"microsoft.operationalinsights/workspaces\"\r\n       | extend resourceGroupId = strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",resourceGroup)\r\n    | project workspaceResourceId = id, workspaceName = name, resourceGroupId, subscriptionId, workspaceCustomerId = tostring(properties.customerId)\r\n) \r\non subscriptionId\r\n| project subscriptionName, subscriptionId, resourceGroupId, workspaceName, workspaceCustomerId, workspaceResourceId",
+        "size": 0,
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources",
+        "crossComponentResources": [
+          "{Subscriptions}"
+        ],
+        "gridSettings": {
+          "rowLimit": 1000
+        }
+      },
+      "conditionalVisibility": {
+        "parameterName": "_",
+        "comparison": "isEqualTo",
+        "value": "_"
+      },
+      "name": "Query - Workspace Details"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\",\"mergeType\":\"inner\",\"leftTable\":\"Query - Computer Details\",\"rightTable\":\"Query - Workspace Details\",\"leftColumn\":\"TenantId\",\"rightColumn\":\"workspaceCustomerId\"}],\"projectRename\":[{\"originalName\":\"[Query - Computer Details].Computer\",\"mergedName\":\"Computer\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].resourceGroupId\",\"mergedName\":\"resourceGroupId\",\"fromId\":\"unknown\"},{\"originalName\":\"[Query - Workspace Details].subscriptionName\",\"mergedName\":\"subscriptionName\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].subscriptionId\",\"mergedName\":\"subscriptionId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceName\",\"mergedName\":\"workspaceName\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceCustomerId\",\"mergedName\":\"workspaceCustomerId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceResourceId\",\"mergedName\":\"workspaceResourceId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Computer Details].TenantId\"}]}",
+        "size": 3,
+        "queryType": 7,
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "$gen_group",
+              "formatter": 13,
+              "formatOptions": {
+                "linkTarget": "Resource",
+                "linkIsContextBlade": true,
+                "showIcon": true
+              }
+            },
+            {
+              "columnMatch": "Computer",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "resourceGroupId",
+              "formatter": 14,
+              "formatOptions": {
+                "linkTarget": "Resource",
+                "linkIsContextBlade": true,
+                "showIcon": true
+              }
+            },
+            {
+              "columnMatch": "subscriptionName",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "subscriptionId",
+              "formatter": 15,
+              "formatOptions": {
+                "linkTarget": "Resource",
+                "linkIsContextBlade": true,
+                "showIcon": true
+              }
+            },
+            {
+              "columnMatch": "workspaceName",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "workspaceCustomerId",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "workspaceResourceId",
+              "formatter": 5,
+              "formatOptions": {
+                "linkTarget": "Resource",
+                "linkIsContextBlade": true
+              }
+            },
+            {
+              "columnMatch": "TenantId",
+              "formatter": 5
+            }
+          ],
+          "rowLimit": 1000,
+          "hierarchySettings": {
+            "treeType": 1,
+            "groupBy": [
+              "Computer"
+            ],
+            "expandTopLevel": true,
+            "finalBy": "workspaceResourceId"
+          },
+          "labelSettings": [
+            {
+              "columnId": "Computer",
+              "label": "Computer / Workspace"
+            }
+          ]
+        }
+      },
+      "name": "Workspace by Computer"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
