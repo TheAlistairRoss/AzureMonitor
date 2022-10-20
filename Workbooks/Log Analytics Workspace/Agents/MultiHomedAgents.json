@@ -5,6 +5,9 @@
       "type": 9,
       "content": {
         "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscriptions}"
+        ],
         "parameters": [
           {
             "id": "65939631-61fa-4a50-8704-5da99f40a018",
@@ -86,7 +89,10 @@
             "timeContext": {
               "durationMs": 86400000
             },
-            "defaultValue": "value::all"
+            "defaultValue": "value::all",
+            "value": [
+              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f"
+            ]
           },
           {
             "id": "803ebf56-dcd4-4adb-af8b-4607c579b554",
@@ -112,7 +118,12 @@
             },
             "defaultValue": "value::all",
             "queryType": 1,
-            "resourceType": "microsoft.resourcegraph/resources"
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": [
+              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/SOC/providers/Microsoft.OperationalInsights/workspaces/CyberSecuritySoc",
+              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/DefaultResourceGroup-CUS/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-d1d8779d-38d7-4f06-91db-9cbc8de0176f-CUS",
+              "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/DefaultResourceGroup-EUS/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-d1d8779d-38d7-4f06-91db-9cbc8de0176f-EUS"
+            ]
           },
           {
             "id": "394e122c-c055-4b2a-a873-a50c2c086d21",
@@ -139,12 +150,71 @@
             },
             "queryType": 8,
             "value": "false"
+          },
+          {
+            "id": "c43d44cf-ad9a-4043-8223-5acd55a22b7d",
+            "version": "KqlParameterItem/1.0",
+            "name": "WorkspaceDetails",
+            "type": 2,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "resources\r\n| where id in ({Workspaces})\r\n| project Packed = tostring(pack(\"Name\",name, \"Id\",tostring(properties.customerId)))\r\n\r\n\r\n",
+            "crossComponentResources": [
+              "{Subscriptions}"
+            ],
+            "isHiddenWhenLocked": true,
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "defaultValue": "value::all",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
           }
         ],
         "style": "pills",
-        "queryType": 8
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
       },
       "name": "parameters - 0"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "adfa4e8d-f7a6-4bc1-8d93-43e7277ea90d",
+            "cellValue": "TabParameter",
+            "linkTarget": "parameter",
+            "linkLabel": "Horizontal",
+            "subTarget": "Horizontal",
+            "style": "link"
+          },
+          {
+            "id": "dc6d3091-b932-4ab0-a42b-08d10d429c30",
+            "cellValue": "TabParameter",
+            "linkTarget": "parameter",
+            "linkLabel": "Vertical",
+            "subTarget": "Vertical",
+            "style": "link"
+          },
+          {
+            "id": "b3fef2b5-0f16-4d99-8a66-05bf689215a7",
+            "cellValue": "TabParameter",
+            "linkTarget": "parameter",
+            "linkLabel": "Graph",
+            "subTarget": "Graph",
+            "style": "link"
+          }
+        ]
+      },
+      "name": "links - 5"
     },
     {
       "type": 3,
@@ -152,6 +222,7 @@
         "version": "KqlItem/1.0",
         "query": "Heartbeat\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| distinct Computer, TenantId\r\n| summarize TenantId = makelist(TenantId) by Computer\r\n| where \"{MultiHomedOnly}\" == \"false\" or array_length(TenantId) > 1\r\n| mvexpand TenantId\r\n| order by Computer asc",
         "size": 0,
+        "title": "Query - Computer Details - Permenatly Hidden",
         "timeContextFromParameter": "TimeRange",
         "queryType": 0,
         "resourceType": "microsoft.operationalinsights/workspaces",
@@ -175,6 +246,7 @@
         "version": "KqlItem/1.0",
         "query": "resourcecontainers\r\n| where type == \"microsoft.resources/subscriptions\"\r\n| project subscriptionName = name, subscriptionId\r\n| join kind = innerunique(\r\n    resources\r\n    | where type =~ \"microsoft.operationalinsights/workspaces\"\r\n       | extend resourceGroupId = strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",resourceGroup)\r\n    | project workspaceResourceId = id, workspaceName = name, resourceGroupId, subscriptionId, workspaceCustomerId = tostring(properties.customerId)\r\n) \r\non subscriptionId\r\n| project subscriptionName, subscriptionId, resourceGroupId, workspaceName, workspaceCustomerId, workspaceResourceId",
         "size": 0,
+        "title": "Query - Workspace Details - Permenatly Hidden",
         "queryType": 1,
         "resourceType": "microsoft.resourcegraph/resources",
         "crossComponentResources": [
@@ -192,89 +264,238 @@
       "name": "Query - Workspace Details"
     },
     {
-      "type": 3,
+      "type": 12,
       "content": {
-        "version": "KqlItem/1.0",
-        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\",\"mergeType\":\"inner\",\"leftTable\":\"Query - Computer Details\",\"rightTable\":\"Query - Workspace Details\",\"leftColumn\":\"TenantId\",\"rightColumn\":\"workspaceCustomerId\"}],\"projectRename\":[{\"originalName\":\"[Query - Computer Details].Computer\",\"mergedName\":\"Computer\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].resourceGroupId\",\"mergedName\":\"resourceGroupId\",\"fromId\":\"unknown\"},{\"originalName\":\"[Query - Workspace Details].subscriptionName\",\"mergedName\":\"subscriptionName\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].subscriptionId\",\"mergedName\":\"subscriptionId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceName\",\"mergedName\":\"workspaceName\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceCustomerId\",\"mergedName\":\"workspaceCustomerId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceResourceId\",\"mergedName\":\"workspaceResourceId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Computer Details].TenantId\"}]}",
-        "size": 3,
-        "queryType": 7,
-        "visualization": "table",
-        "gridSettings": {
-          "formatters": [
-            {
-              "columnMatch": "$gen_group",
-              "formatter": 13,
-              "formatOptions": {
-                "linkTarget": "Resource",
-                "linkIsContextBlade": true,
-                "showIcon": true
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\",\"mergeType\":\"inner\",\"leftTable\":\"Query - Computer Details\",\"rightTable\":\"Query - Workspace Details\",\"leftColumn\":\"TenantId\",\"rightColumn\":\"workspaceCustomerId\"}],\"projectRename\":[{\"originalName\":\"[Query - Computer Details].Computer\",\"mergedName\":\"Computer\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].resourceGroupId\",\"mergedName\":\"resourceGroupId\",\"fromId\":\"unknown\"},{\"originalName\":\"[Query - Workspace Details].subscriptionName\",\"mergedName\":\"subscriptionName\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].subscriptionId\",\"mergedName\":\"subscriptionId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceName\",\"mergedName\":\"workspaceName\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceCustomerId\",\"mergedName\":\"workspaceCustomerId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceResourceId\",\"mergedName\":\"workspaceResourceId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Computer Details].TenantId\"}]}",
+              "size": 3,
+              "queryType": 7,
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "$gen_group",
+                    "formatter": 13,
+                    "formatOptions": {
+                      "linkTarget": "Resource",
+                      "linkIsContextBlade": true,
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "Computer",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "resourceGroupId",
+                    "formatter": 14,
+                    "formatOptions": {
+                      "linkTarget": "Resource",
+                      "linkIsContextBlade": true,
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionName",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": "Resource",
+                      "linkIsContextBlade": true,
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "workspaceName",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "workspaceCustomerId",
+                    "formatter": 5
+                  },
+                  {
+                    "columnMatch": "workspaceResourceId",
+                    "formatter": 5,
+                    "formatOptions": {
+                      "linkTarget": "Resource",
+                      "linkIsContextBlade": true
+                    }
+                  },
+                  {
+                    "columnMatch": "TenantId",
+                    "formatter": 5
+                  }
+                ],
+                "rowLimit": 1000,
+                "hierarchySettings": {
+                  "treeType": 1,
+                  "groupBy": [
+                    "Computer"
+                  ],
+                  "expandTopLevel": true,
+                  "finalBy": "workspaceResourceId"
+                },
+                "labelSettings": [
+                  {
+                    "columnId": "Computer",
+                    "label": "Computer / Workspace"
+                  }
+                ]
               }
             },
-            {
-              "columnMatch": "Computer",
-              "formatter": 5
-            },
-            {
-              "columnMatch": "resourceGroupId",
-              "formatter": 14,
-              "formatOptions": {
-                "linkTarget": "Resource",
-                "linkIsContextBlade": true,
-                "showIcon": true
-              }
-            },
-            {
-              "columnMatch": "subscriptionName",
-              "formatter": 5
-            },
-            {
-              "columnMatch": "subscriptionId",
-              "formatter": 15,
-              "formatOptions": {
-                "linkTarget": "Resource",
-                "linkIsContextBlade": true,
-                "showIcon": true
-              }
-            },
-            {
-              "columnMatch": "workspaceName",
-              "formatter": 5
-            },
-            {
-              "columnMatch": "workspaceCustomerId",
-              "formatter": 5
-            },
-            {
-              "columnMatch": "workspaceResourceId",
-              "formatter": 5,
-              "formatOptions": {
-                "linkTarget": "Resource",
-                "linkIsContextBlade": true
-              }
-            },
-            {
-              "columnMatch": "TenantId",
-              "formatter": 5
-            }
-          ],
-          "rowLimit": 1000,
-          "hierarchySettings": {
-            "treeType": 1,
-            "groupBy": [
-              "Computer"
-            ],
-            "expandTopLevel": true,
-            "finalBy": "workspaceResourceId"
-          },
-          "labelSettings": [
-            {
-              "columnId": "Computer",
-              "label": "Computer / Workspace"
-            }
-          ]
-        }
+            "name": "Workspace by Computer"
+          }
+        ]
       },
-      "name": "Workspace by Computer"
+      "conditionalVisibility": {
+        "parameterName": "TabParameter",
+        "comparison": "isEqualTo",
+        "value": "Horizontal"
+      },
+      "name": "group - By Computer Vertical"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let WorkspaceDetails = datatable (record:dynamic)[dynamic([{WorkspaceDetails}])]\r\n| mv-expand record to typeof(string)\r\n| extend record = todynamic(record)\r\n| evaluate bag_unpack(record) : (Name:string, Id:string)\r\n;\r\nHeartbeat\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| distinct Computer, TenantId\r\n| extend TenantId = TenantId\r\n| summarize TenantId = makelist(TenantId) by Computer\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| mvexpand TenantId to typeof(string)\r\n| join kind=innerunique (\r\n    WorkspaceDetails\r\n) on $left.TenantId == $right.Id\r\n| project Computer, Name\r\n| evaluate pivot(Name)\r\n",
+              "size": 0,
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspaces}"
+              ],
+              "visualization": "table",
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "Computer",
+                    "formatter": 1
+                  },
+                  {
+                    "columnMatch": "^(?!Computer).+",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        {
+                          "operator": "==",
+                          "thresholdValue": "1",
+                          "representation": "success",
+                          "text": ""
+                        },
+                        {
+                          "operator": "Default",
+                          "thresholdValue": null,
+                          "representation": "Blank",
+                          "text": ""
+                        }
+                      ],
+                      "customColumnWidthSetting": "24.5ch"
+                    }
+                  }
+                ],
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_thresholds_^(?!Computer).+_1",
+                    "sortOrder": 2
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_thresholds_^(?!Computer).+_1",
+                  "sortOrder": 2
+                }
+              ]
+            },
+            "name": "query - 4"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "TabParameter",
+        "comparison": "isEqualTo",
+        "value": "Vertical"
+      },
+      "name": "group - By Computer Horizontal"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let WorkspaceDetails = datatable (record:dynamic)[dynamic([{WorkspaceDetails}])]\r\n| mv-expand record to typeof(string)\r\n| extend record = todynamic(record)\r\n| evaluate bag_unpack(record) : (Name:string, Id:string)\r\n;\r\nHeartbeat\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| distinct Computer, TenantId\r\n| extend TenantId = TenantId\r\n| summarize TenantId = makelist(TenantId) by Computer\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| mvexpand TenantId to typeof(string)\r\n| join kind=innerunique (\r\n    WorkspaceDetails\r\n) on $left.TenantId == $right.Id\r\n\r\n",
+              "size": 0,
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspaces}"
+              ],
+              "visualization": "graph",
+              "gridSettings": {
+                "sortBy": [
+                  {
+                    "itemKey": "$gen_thresholds_^(?!Computer).+_1",
+                    "sortOrder": 2
+                  }
+                ]
+              },
+              "sortBy": [
+                {
+                  "itemKey": "$gen_thresholds_^(?!Computer).+_1",
+                  "sortOrder": 2
+                }
+              ],
+              "graphSettings": {
+                "type": 0,
+                "topContent": {},
+                "nodeIdField": "Name",
+                "sourceIdField": "Computer",
+                "targetIdField": "Computer",
+                "graphOrientation": 3,
+                "showOrientationToggles": false,
+                "nodeSize": null,
+                "staticNodeSize": 100,
+                "colorSettings": null,
+                "hivesMargin": 5
+              },
+              "mapSettings": {
+                "locInfo": "LatLong"
+              }
+            },
+            "name": "query - 4 - Copy"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "TabParameter",
+        "comparison": "isEqualTo",
+        "value": "Graph"
+      },
+      "name": "group - Graph"
     }
   ],
   "fallbackResourceIds": [
