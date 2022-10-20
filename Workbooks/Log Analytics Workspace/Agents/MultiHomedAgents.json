@@ -5,9 +5,6 @@
       "type": 9,
       "content": {
         "version": "KqlParameterItem/1.0",
-        "crossComponentResources": [
-          "{Subscriptions}"
-        ],
         "parameters": [
           {
             "id": "65939631-61fa-4a50-8704-5da99f40a018",
@@ -123,12 +120,29 @@
             "name": "ComputerFilter",
             "label": "Computer Name Filter",
             "type": 1,
-            "description": "Filters Computers based on the start of the string. If left unset, it will return all devices"
+            "description": "Filters Computers based on the start of the string. If left unset, it will return all devices",
+            "value": ""
+          },
+          {
+            "id": "b3fd68fe-9782-4ade-86ea-faac47520236",
+            "version": "KqlParameterItem/1.0",
+            "name": "MultiHomedOnly",
+            "label": "Multi Homed Agents Only",
+            "type": 10,
+            "isRequired": true,
+            "query": "{\"version\":\"1.0.0\",\"content\":\"[\\r\\n\\t{\\\"value\\\" :true, \\\"label\\\":true, \\\"selected\\\":true},\\r\\n\\t{\\\"value\\\" :false, \\\"label\\\":false, \\\"selected\\\":false}\\r\\n]\",\"transformers\":null}",
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 8,
+            "value": "false"
           }
         ],
         "style": "pills",
-        "queryType": 1,
-        "resourceType": "microsoft.resourcegraph/resources"
+        "queryType": 8
       },
       "name": "parameters - 0"
     },
@@ -136,7 +150,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "Heartbeat\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| distinct Computer, TenantId\r\n| order by Computer asc",
+        "query": "Heartbeat\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| distinct Computer, TenantId\r\n| summarize TenantId = makelist(TenantId) by Computer\r\n| where \"{MultiHomedOnly}\" == \"false\" or array_length(TenantId) > 1\r\n| mvexpand TenantId\r\n| order by Computer asc",
         "size": 0,
         "timeContextFromParameter": "TimeRange",
         "queryType": 0,
