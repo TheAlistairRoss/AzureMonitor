@@ -5,6 +5,9 @@
       "type": 9,
       "content": {
         "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscriptions}"
+        ],
         "parameters": [
           {
             "id": "65939631-61fa-4a50-8704-5da99f40a018",
@@ -72,6 +75,7 @@
             "version": "KqlParameterItem/1.0",
             "name": "Subscriptions",
             "type": 6,
+            "description": "List only subscriptions that the user has permissions to and has the required monitoring resources.If a subscription is not listed, ensure it has a log analytics workspace or a data collection rule and the user has read access to these resources",
             "isRequired": true,
             "multiSelect": true,
             "quote": "'",
@@ -81,6 +85,7 @@
                 "value::all"
               ],
               "includeAll": false,
+              "selectAllValue": "",
               "showDefault": false
             },
             "timeContext": {
@@ -97,7 +102,7 @@
             "multiSelect": true,
             "quote": "'",
             "delimiter": ",",
-            "query": "resourcecontainers\r\n| where type == \"microsoft.resources/subscriptions\"\r\n| project subscriptionName = name, subscriptionId\r\n| join kind = innerunique(\r\n    resources\r\n    | where type =~ \"microsoft.operationalinsights/workspaces\"\r\n    | project workspaceId = id, workspaceName = name, subscriptionId\r\n) \r\non subscriptionId\r\n| project value = workspaceId, label = workspaceName, group = subscriptionName\r\n| order by group asc, label asc",
+            "query": "resourcecontainers\r\n| where type == \"microsoft.resources/subscriptions\"\r\n| project subscriptionName = name, subscriptionId\r\n| join kind = inner(\r\n    resources\r\n    | where type =~ \"microsoft.operationalinsights/workspaces\"\r\n    | project workspaceId = id, workspaceName = name, subscriptionId\r\n) \r\non subscriptionId\r\n| project value = workspaceId, label = workspaceName, group = subscriptionName\r\n| order by group asc, label asc",
             "crossComponentResources": [
               "{Subscriptions}"
             ],
@@ -112,7 +117,8 @@
             },
             "defaultValue": "value::all",
             "queryType": 1,
-            "resourceType": "microsoft.resourcegraph/resources"
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": []
           },
           {
             "id": "394e122c-c055-4b2a-a873-a50c2c086d21",
@@ -139,142 +145,900 @@
             },
             "queryType": 8,
             "value": "false"
+          },
+          {
+            "id": "c43d44cf-ad9a-4043-8223-5acd55a22b7d",
+            "version": "KqlParameterItem/1.0",
+            "name": "WorkspaceDetails",
+            "type": 2,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "resources\r\n| where id in ({Workspaces})\r\n| project Packed = tostring(pack(\"CustomerId\",tostring(properties.customerId),\"ResourceId\",id,\"WorkspaceLocation\",location))\r\n\r\n\r\n",
+            "crossComponentResources": [
+              "{Subscriptions}"
+            ],
+            "isHiddenWhenLocked": true,
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "defaultValue": "value::all",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "70dc8a0b-0ebb-47f9-93fe-b167b5441da7",
+            "version": "KqlParameterItem/1.0",
+            "name": "ShowHelp",
+            "label": "Show Help",
+            "type": 10,
+            "isRequired": true,
+            "query": "{\"version\":\"1.0.0\",\"content\":\"[\\r\\n\\t{\\\"value\\\":true,\\\"label\\\":\\\"Yes\\\",\\\"selected\\\":true},\\r\\n\\t{\\\"value\\\":false,\\\"label\\\":\\\"No\\\"}\\r\\n]\",\"transformers\":null}",
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "queryType": 8,
+            "value": "false"
+          },
+          {
+            "id": "1bb29332-caf9-4284-9916-016974f88593",
+            "version": "KqlParameterItem/1.0",
+            "name": "QueryWorkspace",
+            "label": "Query Workspace",
+            "type": 5,
+            "description": "Azure Resource Graph has a limited set of KQL functions avaliabile for use. Data pulled from Azure Resource Graph will be presented run in this environment.",
+            "isRequired": true,
+            "query": "resources\r\n| where type == \"microsoft.operationalinsights/workspaces\"",
+            "crossComponentResources": [
+              "{Subscriptions}"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::1"
+              ],
+              "showDefault": false
+            },
+            "defaultValue": "value::1",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": "/subscriptions/d1d8779d-38d7-4f06-91db-9cbc8de0176f/resourceGroups/soc/providers/Microsoft.OperationalInsights/workspaces/cybersecuritysoc"
           }
         ],
         "style": "pills",
-        "queryType": 8
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
       },
       "name": "parameters - 0"
     },
     {
-      "type": 3,
+      "type": 1,
       "content": {
-        "version": "KqlItem/1.0",
-        "query": "Heartbeat\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| distinct Computer, TenantId\r\n| summarize TenantId = makelist(TenantId) by Computer\r\n| where \"{MultiHomedOnly}\" == \"false\" or array_length(TenantId) > 1\r\n| mvexpand TenantId\r\n| order by Computer asc",
-        "size": 0,
-        "timeContextFromParameter": "TimeRange",
-        "queryType": 0,
-        "resourceType": "microsoft.operationalinsights/workspaces",
-        "crossComponentResources": [
-          "{Workspaces}"
-        ],
-        "gridSettings": {
-          "rowLimit": 1000
-        }
+        "json": "No Log Analytics workspaces selected. Please ensure at least one workspace is selected in the above parameters",
+        "style": "warning"
       },
       "conditionalVisibility": {
-        "parameterName": "_",
-        "comparison": "isEqualTo",
-        "value": "_"
+        "parameterName": "Workspaces",
+        "comparison": "isEqualTo"
       },
-      "name": "Query - Computer Details"
+      "name": "text - Summary Warning"
     },
     {
-      "type": 3,
+      "type": 12,
       "content": {
-        "version": "KqlItem/1.0",
-        "query": "resourcecontainers\r\n| where type == \"microsoft.resources/subscriptions\"\r\n| project subscriptionName = name, subscriptionId\r\n| join kind = innerunique(\r\n    resources\r\n    | where type =~ \"microsoft.operationalinsights/workspaces\"\r\n       | extend resourceGroupId = strcat(\"/subscriptions/\",subscriptionId,\"/resourceGroups/\",resourceGroup)\r\n    | project workspaceResourceId = id, workspaceName = name, resourceGroupId, subscriptionId, workspaceCustomerId = tostring(properties.customerId)\r\n) \r\non subscriptionId\r\n| project subscriptionName, subscriptionId, resourceGroupId, workspaceName, workspaceCustomerId, workspaceResourceId",
-        "size": 0,
-        "queryType": 1,
-        "resourceType": "microsoft.resourcegraph/resources",
-        "crossComponentResources": [
-          "{Subscriptions}"
-        ],
-        "gridSettings": {
-          "rowLimit": 1000
-        }
-      },
-      "conditionalVisibility": {
-        "parameterName": "_",
-        "comparison": "isEqualTo",
-        "value": "_"
-      },
-      "name": "Query - Workspace Details"
-    },
-    {
-      "type": 3,
-      "content": {
-        "version": "KqlItem/1.0",
-        "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\",\"mergeType\":\"inner\",\"leftTable\":\"Query - Computer Details\",\"rightTable\":\"Query - Workspace Details\",\"leftColumn\":\"TenantId\",\"rightColumn\":\"workspaceCustomerId\"}],\"projectRename\":[{\"originalName\":\"[Query - Computer Details].Computer\",\"mergedName\":\"Computer\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].resourceGroupId\",\"mergedName\":\"resourceGroupId\",\"fromId\":\"unknown\"},{\"originalName\":\"[Query - Workspace Details].subscriptionName\",\"mergedName\":\"subscriptionName\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].subscriptionId\",\"mergedName\":\"subscriptionId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceName\",\"mergedName\":\"workspaceName\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceCustomerId\",\"mergedName\":\"workspaceCustomerId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Workspace Details].workspaceResourceId\",\"mergedName\":\"workspaceResourceId\",\"fromId\":\"64c3db2b-0416-44dc-a3df-0bcfe97ba03f\"},{\"originalName\":\"[Query - Computer Details].TenantId\"}]}",
-        "size": 3,
-        "queryType": 7,
-        "visualization": "table",
-        "gridSettings": {
-          "formatters": [
-            {
-              "columnMatch": "$gen_group",
-              "formatter": 13,
-              "formatOptions": {
-                "linkTarget": "Resource",
-                "linkIsContextBlade": true,
-                "showIcon": true
-              }
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# Agent Details\r\n\r\nThese pages load data from multiple workspaces and Azure Resource Graph and merge them for presentation. There are many factors which can affect the loading of this query.\r\n\r\n - **Time Range** - The further back the time range is set, the more agents will be returned.\r\n \r\n - **Number of Workspaces** - For multihoming, this is essential to understand where the data is going, however if there are too many workspaces, the data may take a long time to load. \r\n \r\n - **Number of Computers** - The workbook may be trying to present more data than that can be shown in Azure Workbooks. Consider using a text filter in the *Computer Name Filter* parameter. This uses the case insensitive *startswith* operator.\r\n\r\n ## Please note\r\n The queries that render the views will have to rerun between changing the view between Horizontal, Vertical and Graph",
+              "style": "info"
             },
-            {
-              "columnMatch": "Computer",
-              "formatter": 5
+            "customWidth": "100",
+            "conditionalVisibility": {
+              "parameterName": "ShowHelp",
+              "comparison": "isEqualTo",
+              "value": "true"
             },
-            {
-              "columnMatch": "resourceGroupId",
-              "formatter": 14,
-              "formatOptions": {
-                "linkTarget": "Resource",
-                "linkIsContextBlade": true,
-                "showIcon": true
-              }
-            },
-            {
-              "columnMatch": "subscriptionName",
-              "formatter": 5
-            },
-            {
-              "columnMatch": "subscriptionId",
-              "formatter": 15,
-              "formatOptions": {
-                "linkTarget": "Resource",
-                "linkIsContextBlade": true,
-                "showIcon": true
-              }
-            },
-            {
-              "columnMatch": "workspaceName",
-              "formatter": 5
-            },
-            {
-              "columnMatch": "workspaceCustomerId",
-              "formatter": 5
-            },
-            {
-              "columnMatch": "workspaceResourceId",
-              "formatter": 5,
-              "formatOptions": {
-                "linkTarget": "Resource",
-                "linkIsContextBlade": true
-              }
-            },
-            {
-              "columnMatch": "TenantId",
-              "formatter": 5
-            }
-          ],
-          "rowLimit": 1000,
-          "hierarchySettings": {
-            "treeType": 1,
-            "groupBy": [
-              "Computer"
-            ],
-            "expandTopLevel": true,
-            "finalBy": "workspaceResourceId"
+            "name": "group - Main Content Help 01"
           },
-          "labelSettings": [
-            {
-              "columnId": "Computer",
-              "label": "Computer / Workspace"
-            }
-          ]
-        }
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ \"microsoft.operationalinsights/workspaces\" or type =~ \"microsoft.insights/datacollectionrules\"\r\n| distinct subscriptionId\r\n| extend IsSelected = iif(subscriptionId in ({Subscriptions:subId}),\"Included\",\"Excluded\")\r\n| summarize Count = count() by IsSelected\r\n",
+              "size": 1,
+              "title": "Selected Subscriptions",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "value::all"
+              ],
+              "visualization": "piechart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "Included",
+                    "color": "blue"
+                  },
+                  {
+                    "seriesName": "Excluded",
+                    "color": "orange"
+                  }
+                ]
+              }
+            },
+            "customWidth": "33",
+            "name": "query - Summary - Selected Subscriptions"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ \"microsoft.operationalinsights/workspaces\"\r\n| distinct id\r\n| extend IsSelected = iif(id in ({Workspaces}),\"Included\",\"Excluded\")\r\n| summarize Count = count() by IsSelected\r\n",
+              "size": 1,
+              "title": "Selected Workspaces",
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [
+                "value::all"
+              ],
+              "visualization": "piechart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "Included",
+                    "color": "blue"
+                  },
+                  {
+                    "seriesName": "Excluded",
+                    "color": "orange"
+                  }
+                ]
+              }
+            },
+            "customWidth": "33",
+            "name": "query - Summary - Selected Workspaces"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "Heartbeat\r\n| distinct Computer\r\n| extend IsSelectedComputer = case(\r\n    \"{ComputerFilter}\" == \"\", \"Included\",\r\n    Computer startswith \"{ComputerFilter}\", \"Included\", \r\n    \"Excluded\"\r\n)\r\n| summarize Count = count() by IsSelectedComputer",
+              "size": 1,
+              "title": "Selected Computers",
+              "timeContextFromParameter": "TimeRange",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "{Workspaces}"
+              ],
+              "visualization": "piechart",
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "Included",
+                    "color": "blue"
+                  },
+                  {
+                    "seriesName": "Excluded",
+                    "color": "orange"
+                  }
+                ]
+              }
+            },
+            "customWidth": "33",
+            "name": "query - Summary - Selected Computers"
+          }
+        ]
       },
-      "name": "Workspace by Computer"
+      "conditionalVisibility": {
+        "parameterName": "ShowHelp",
+        "comparison": "isEqualTo",
+        "value": "true"
+      },
+      "name": "group - Summary"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 11,
+            "content": {
+              "version": "LinkItem/1.0",
+              "style": "tabs",
+              "links": [
+                {
+                  "id": "dc6d3091-b932-4ab0-a42b-08d10d429c30",
+                  "cellValue": "TabParameter",
+                  "linkTarget": "parameter",
+                  "linkLabel": "Vertical",
+                  "subTarget": "Vertical",
+                  "style": "link"
+                },
+                {
+                  "id": "adfa4e8d-f7a6-4bc1-8d93-43e7277ea90d",
+                  "cellValue": "TabParameter",
+                  "linkTarget": "parameter",
+                  "linkLabel": "Horizontal",
+                  "subTarget": "Horizontal",
+                  "style": "link"
+                },
+                {
+                  "id": "b3fef2b5-0f16-4d99-8a66-05bf689215a7",
+                  "cellValue": "TabParameter",
+                  "linkTarget": "parameter",
+                  "linkLabel": "Graph",
+                  "subTarget": "Graph",
+                  "style": "link"
+                },
+                {
+                  "id": "59d33771-2589-4e9f-9b01-873014914f8e",
+                  "cellValue": "TabParameter",
+                  "linkTarget": "parameter",
+                  "linkLabel": "Map",
+                  "subTarget": "Map",
+                  "style": "link"
+                }
+              ]
+            },
+            "name": "links - 5"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "# Vertical view\r\n\r\nThis view shows one row for each workspace. If a computer has sent a heartbeat to a selected workspace within the specified time range, then a row will be shown specifiying the computer and the workspace.\r\n\r\nYou can change how this view is displayed by changing the *Group Workspaces by Computer* parameter."
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "ShowHelp",
+                    "comparison": "isEqualTo",
+                    "value": "true"
+                  },
+                  "name": "text - 3"
+                },
+                {
+                  "type": 9,
+                  "content": {
+                    "version": "KqlParameterItem/1.0",
+                    "parameters": [
+                      {
+                        "id": "17e121b1-116d-4035-bfb3-dd1108883489",
+                        "version": "KqlParameterItem/1.0",
+                        "name": "GroupByComputer",
+                        "label": "Group Workspaces by Computer",
+                        "type": 10,
+                        "isRequired": true,
+                        "query": "{\"version\":\"1.0.0\",\"content\":\"[\\r\\n\\t{\\\"value\\\":false,\\\"Label\\\":\\\"False\\\",\\\"selected\\\":true},\\r\\n\\t{\\\"value\\\":true,\\\"Label\\\":\\\"True\\\"}\\r\\n]\",\"transformers\":null}",
+                        "typeSettings": {
+                          "additionalResourceOptions": [],
+                          "showDefault": false
+                        },
+                        "timeContext": {
+                          "durationMs": 86400000
+                        },
+                        "queryType": 8,
+                        "value": "true"
+                      }
+                    ],
+                    "style": "pills",
+                    "queryType": 8
+                  },
+                  "name": "parameters - 6"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "let ComputerFilter = \"{ComputerFilter}\";\r\nlet MultiHomedOnly = \"{MultiHomedOnly}\";\r\nlet WorkspaceDetails = datatable (record:dynamic)[dynamic([{WorkspaceDetails}])]\r\n    | mv-expand record to typeof(string)\r\n    | extend record = todynamic(record)\r\n    | evaluate bag_unpack(record): (CustomerId: string, ResourceId: string, WorkspaceLocation: string)\r\n    | project CustomerId, Workspace = ResourceId, WorkspaceLocation;\r\nlet ComputerDetails = Heartbeat\r\n    | where ComputerFilter == \"\" or Computer startswith ComputerFilter\r\n    | distinct Computer, TenantId, _ResourceId\r\n    | project Computer = tolower(Computer),\r\n        ComputerId = iif(isnotempty(_ResourceId), _ResourceId, Computer),\r\n        TenantId = TenantId;\r\nlet WorkspaceCount = ComputerDetails\r\n    | summarize TenantId = makelist(TenantId) by Computer\r\n    | where MultiHomedOnly == \"false\" or array_length(TenantId) > 1\r\n    | mvexpand TenantId to typeof(string);\r\nComputerDetails\r\n| join kind=innerunique (WorkspaceCount) on Computer\r\n| join kind=inner (\r\n    WorkspaceDetails\r\n    )\r\n    on $left.TenantId == $right.CustomerId\r\n| project ComputerId,\r\n    ['Computer Name'] = Computer, \r\n    ['Workspace Count'] = 1,\r\n    Workspace, \r\n    ['Workspace Name'] = tostring(split(Workspace, \"/\", 8)[0]),\r\n    ['Workspace Location'] = WorkspaceLocation,\r\n    ['Workspace Resource Group'] = substring(Workspace, 0, indexof(Workspace, \"/\", 0, -1, 5)),\r\n    ['Workspace Subscription'] = substring(Workspace, 0, indexof(Workspace, \"/\", 0, -1, 3))\r\n| order by ['Computer Name'] asc, ['Workspace Name'] asc\r\n",
+                    "size": 3,
+                    "timeContextFromParameter": "TimeRange",
+                    "showRefreshButton": true,
+                    "showExportToExcel": true,
+                    "exportToExcelOptions": "all",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspaces}"
+                    ],
+                    "visualization": "table",
+                    "showExpandCollapseGrid": true,
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "ComputerId",
+                          "formatter": 13,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true,
+                            "customColumnWidthSetting": "20%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Computer Name",
+                          "formatter": 5,
+                          "formatOptions": {
+                            "customColumnWidthSetting": "25%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Workspace Count",
+                          "formatter": 5,
+                          "formatOptions": {
+                            "aggregation": "Sum"
+                          }
+                        },
+                        {
+                          "columnMatch": "Workspace",
+                          "formatter": 13,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true,
+                            "customColumnWidthSetting": "20%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Workspace Name",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Workspace Location",
+                          "formatter": 17,
+                          "formatOptions": {
+                            "customColumnWidthSetting": "20%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Workspace Resource Group",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true,
+                            "customColumnWidthSetting": "20%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Workspace Subscription",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true,
+                            "customColumnWidthSetting": "20%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Computer",
+                          "formatter": 0,
+                          "formatOptions": {
+                            "customColumnWidthSetting": "25%"
+                          }
+                        }
+                      ],
+                      "rowLimit": 1000,
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "ComputerId",
+                          "label": "Computer"
+                        }
+                      ]
+                    }
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "GroupByComputer",
+                    "comparison": "isEqualTo",
+                    "value": "false"
+                  },
+                  "name": "Query - Computers Vertical - Ungrouped"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "{\"version\":\"Merge/1.0\",\"merges\":[{\"id\":\"46c73f9b-ec69-4d64-82ec-7b632375859a\",\"mergeType\":\"table\",\"leftTable\":\"Query - Computers Vertical - Ungrouped\"}],\"projectRename\":[{\"originalName\":\"[Query - Computers Vertical - Ungrouped].ComputerId\",\"mergedName\":\"ComputerId\",\"fromId\":\"unknown\"},{\"originalName\":\"[Query - Computers Vertical - Ungrouped].Computer Name\",\"mergedName\":\"Computer Name\",\"fromId\":\"unknown\"},{\"originalName\":\"[Query - Computers Vertical - Ungrouped].Workspace Count\",\"mergedName\":\"Workspace Count\",\"fromId\":\"unknown\"},{\"originalName\":\"[Query - Computers Vertical - Ungrouped].Workspace Location\",\"mergedName\":\"Workspace Location\",\"fromId\":\"unknown\"},{\"originalName\":\"[Query - Computers Vertical - Ungrouped].Workspace\",\"mergedName\":\"Workspace\",\"fromId\":\"46c73f9b-ec69-4d64-82ec-7b632375859a\"},{\"originalName\":\"[Query - Computers Vertical - Ungrouped].Workspace Name\",\"mergedName\":\"Workspace Name\",\"fromId\":\"46c73f9b-ec69-4d64-82ec-7b632375859a\"},{\"originalName\":\"[Query - Computers Vertical - Ungrouped].Workspace Resource Group\",\"mergedName\":\"Workspace Resource Group\",\"fromId\":\"46c73f9b-ec69-4d64-82ec-7b632375859a\"},{\"originalName\":\"[Query - Computers Vertical - Ungrouped].Workspace Subscription\",\"mergedName\":\"Workspace Subscription\",\"fromId\":\"46c73f9b-ec69-4d64-82ec-7b632375859a\"}]}",
+                    "size": 3,
+                    "showExportToExcel": true,
+                    "exportToExcelOptions": "all",
+                    "queryType": 7,
+                    "visualization": "table",
+                    "showExpandCollapseGrid": true,
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "$gen_group",
+                          "formatter": 13,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true,
+                            "customColumnWidthSetting": "24%"
+                          }
+                        },
+                        {
+                          "columnMatch": "ComputerId",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Computer",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Workspace Count",
+                          "formatter": 3,
+                          "formatOptions": {
+                            "min": 0,
+                            "max": 4,
+                            "palette": "blue",
+                            "aggregation": "Count",
+                            "customColumnWidthSetting": "19%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Workspace Location",
+                          "formatter": 17,
+                          "formatOptions": {
+                            "customColumnWidthSetting": "19%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Workspace",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Workspace Name",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Workspace Resource Group",
+                          "formatter": 14,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true,
+                            "customColumnWidthSetting": "19%"
+                          }
+                        },
+                        {
+                          "columnMatch": "Workspace Subscription",
+                          "formatter": 15,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true,
+                            "customColumnWidthSetting": "19%"
+                          }
+                        }
+                      ],
+                      "rowLimit": 1000,
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "ComputerId"
+                        ],
+                        "expandTopLevel": true,
+                        "finalBy": "Workspace"
+                      },
+                      "labelSettings": [
+                        {
+                          "columnId": "ComputerId",
+                          "label": "Computer"
+                        }
+                      ]
+                    }
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "GroupByComputer",
+                    "comparison": "isEqualTo",
+                    "value": "true"
+                  },
+                  "showPin": false,
+                  "name": "Query - Computers Vertical - Grouped"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "TabParameter",
+              "comparison": "isEqualTo",
+              "value": "Vertical"
+            },
+            "name": "group - By Computer Vertical"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "# Horizontal view\r\n\r\nThis view shows one row for each Computer. If the Computer has sent a heartbeat to a selected workspace within the specified time range, then a green circle with a tick will appear in the workspace named column, otherwise it will be empty.",
+                    "style": "info"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "ShowHelp",
+                    "comparison": "isEqualTo",
+                    "value": "true"
+                  },
+                  "name": "text - 1"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "let WorkspaceDetails = datatable (record:dynamic)[dynamic([{WorkspaceDetails}])]\r\n| mv-expand record to typeof(string)\r\n| extend record = todynamic(record)\r\n| evaluate bag_unpack(record) : (CustomerId:string, ResourceId:string)\r\n| project CustomerId, Workspace = tostring(split(ResourceId,\"/\",8)[0])\r\n;\r\nlet Details = Heartbeat\r\n| where \"{ComputerFilter}\" == \"\" or Computer startswith \"{ComputerFilter}\"\r\n| distinct Computer, TenantId, _ResourceId\r\n| extend TenantId = TenantId\r\n| summarize TenantId = makelist(TenantId) by Computer, _ResourceId\r\n| where \"{MultiHomedOnly}\" == \"false\" or array_length(TenantId) > 1\r\n| mvexpand TenantId to typeof(string)\r\n| join kind=inner (\r\n    WorkspaceDetails\r\n    )\r\n    on $left.TenantId == $right.CustomerId\r\n| project Computer = tolower(Computer), _ResourceId, Workspace;\r\nDetails\r\n| evaluate pivot(Workspace)\r\n| join kind = innerunique (\r\n    Details\r\n    | distinct Computer, Workspace\r\n    | summarize WorkspaceCount = count() by Computer\r\n) on Computer\r\n| extend ComputerId = iif(isnotempty(_ResourceId), _ResourceId, Computer)\r\n| project-away Computer1, _ResourceId\r\n| order by Computer asc\r\n| project-rename ['Computer Name'] = Computer, ['Workspace Count'] = WorkspaceCount\r\n| project-reorder ComputerId, ['Computer Name'], ['Workspace Count']  asc \r\n\r\n",
+                    "size": 3,
+                    "timeContextFromParameter": "TimeRange",
+                    "showExportToExcel": true,
+                    "exportToExcelOptions": "all",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspaces}"
+                    ],
+                    "visualization": "table",
+                    "showExpandCollapseGrid": true,
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "ComputerId",
+                          "formatter": 13,
+                          "formatOptions": {
+                            "linkTarget": null,
+                            "showIcon": true
+                          },
+                          "tooltipFormat": {
+                            "tooltip": "Computer Name with Resource type icon. No icon indicates it is a non azure managed vm"
+                          }
+                        },
+                        {
+                          "columnMatch": "Computer Name",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Workspace Count",
+                          "formatter": 3,
+                          "formatOptions": {
+                            "min": 0,
+                            "max": 4,
+                            "palette": "blue"
+                          }
+                        },
+                        {
+                          "columnMatch": "^(?!Computer).+",
+                          "formatter": 18,
+                          "formatOptions": {
+                            "thresholdsOptions": "icons",
+                            "thresholdsGrid": [
+                              {
+                                "operator": "==",
+                                "thresholdValue": "1",
+                                "representation": "success",
+                                "text": ""
+                              },
+                              {
+                                "operator": "Default",
+                                "thresholdValue": null,
+                                "representation": "Blank",
+                                "text": ""
+                              }
+                            ],
+                            "customColumnWidthSetting": "24.5ch"
+                          }
+                        }
+                      ],
+                      "rowLimit": 1000,
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "ComputerId",
+                          "label": "Computer"
+                        }
+                      ]
+                    },
+                    "sortBy": []
+                  },
+                  "showPin": false,
+                  "name": "query - 4"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "TabParameter",
+              "comparison": "isEqualTo",
+              "value": "Horizontal"
+            },
+            "name": "group - By Computer Horizontal"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 12,
+                  "content": {
+                    "version": "NotebookGroup/1.0",
+                    "groupType": "editable",
+                    "title": "All Agents and Workspaces",
+                    "items": [
+                      {
+                        "type": 1,
+                        "content": {
+                          "json": "This graph shows all the selected workspaces and agents and their relationship to one another, including multihomed connections",
+                          "style": "info"
+                        },
+                        "conditionalVisibility": {
+                          "parameterName": "ShowHelp",
+                          "comparison": "isEqualTo",
+                          "value": "true"
+                        },
+                        "name": "text - 2"
+                      },
+                      {
+                        "type": 3,
+                        "content": {
+                          "version": "KqlItem/1.0",
+                          "query": "let ComputerFilter = \"{ComputerFilter}\";\r\nlet MultiHomedOnly = \"{MultiHomedOnly}\";\r\nlet WorkspaceDetails = datatable (record:dynamic)[dynamic([{WorkspaceDetails}])]\r\n    | mv-expand record to typeof(string)\r\n    | extend record = todynamic(record)\r\n    | evaluate bag_unpack(record): (CustomerId: string, ResourceId: string)\r\n    | project CustomerId, Workspace = ResourceId;\r\n// Node, Source, Target, Label, Size\r\nlet WorkspaceOutput = Heartbeat\r\n    | distinct Computer, TenantId\r\n    | extend TenantId = TenantId\r\n    | summarize ComputerCount = count() by TenantId\r\n    | join kind = inner (\r\n        WorkspaceDetails\r\n    ) on $left.TenantId == $right. CustomerId\r\n    | project \r\n        Node = TenantId,\r\n        Source = \"\",\r\n        Target = \"\",\r\n        Label = Workspace,\r\n        NodeCategory = \"Workspace\",\r\n        BottomContent = strcat(ComputerCount, \" Computers\");\r\nlet ComputersOutput = Heartbeat\r\n    | distinct Computer\r\n    | project \r\n        Node = Computer,\r\n        Label = Computer,\r\n        NodeCategory = \"Agent\";\r\nlet RelationshipsOutput = Heartbeat\r\n    | distinct Computer, TenantId\r\n    | extend TenantId = TenantId\r\n    | project \r\n        Source = Computer,\r\n        Target = TenantId;\r\nWorkspaceOutput\r\n| union ComputersOutput, RelationshipsOutput\r\n\r\n",
+                          "size": 3,
+                          "timeContextFromParameter": "TimeRange",
+                          "queryType": 0,
+                          "resourceType": "microsoft.operationalinsights/workspaces",
+                          "crossComponentResources": [
+                            "{Workspaces}"
+                          ],
+                          "visualization": "graph",
+                          "sortBy": [],
+                          "graphSettings": {
+                            "type": 0,
+                            "topContent": {},
+                            "centerContent": {
+                              "columnMatch": "Label",
+                              "formatter": 13,
+                              "formatOptions": {
+                                "linkTarget": null,
+                                "showIcon": true
+                              }
+                            },
+                            "bottomContent": {
+                              "columnMatch": "BottomContent",
+                              "formatter": 1
+                            },
+                            "nodeIdField": "Node",
+                            "sourceIdField": "Source",
+                            "targetIdField": "Target",
+                            "graphOrientation": 3,
+                            "showOrientationToggles": true,
+                            "edgeLabel": "Relationship",
+                            "nodeSize": {
+                              "sizeField": "Node",
+                              "minSize": 5,
+                              "maxSize": 5
+                            },
+                            "staticNodeSize": 100,
+                            "colorSettings": {
+                              "nodeColorField": "NodeCategory",
+                              "type": 3,
+                              "thresholdsGrid": [
+                                {
+                                  "operator": "==",
+                                  "thresholdValue": "Workspace",
+                                  "representation": "blue"
+                                },
+                                {
+                                  "operator": "==",
+                                  "thresholdValue": "Agent",
+                                  "representation": "orange"
+                                },
+                                {
+                                  "operator": "Default",
+                                  "thresholdValue": null,
+                                  "representation": "blue"
+                                }
+                              ]
+                            },
+                            "hivesMargin": 5
+                          },
+                          "mapSettings": {
+                            "locInfo": "LatLong"
+                          }
+                        },
+                        "name": "query - Graph - All Agents and Workspaces"
+                      }
+                    ]
+                  },
+                  "name": "group - graph - All Agents and Workspaces",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 12,
+                  "content": {
+                    "version": "NotebookGroup/1.0",
+                    "groupType": "editable",
+                    "title": "Aggregated Agent and Workspace distribution",
+                    "items": [
+                      {
+                        "type": 1,
+                        "content": {
+                          "json": "This graph shows all the selected workspaces and an aggregated agent view of agents reporting to one or more workspaces",
+                          "style": "info"
+                        },
+                        "conditionalVisibility": {
+                          "parameterName": "ShowHelp",
+                          "comparison": "isEqualTo",
+                          "value": "true"
+                        },
+                        "name": "text - 2 - Copy"
+                      },
+                      {
+                        "type": 3,
+                        "content": {
+                          "version": "KqlItem/1.0",
+                          "query": "let ComputerFilter = \"{ComputerFilter}\";\r\nlet MultiHomedOnly = \"{MultiHomedOnly}\";\r\nlet WorkspaceDetails = datatable (record:dynamic)[dynamic([{WorkspaceDetails}])]\r\n    | mv-expand record to typeof(string)\r\n    | extend record = todynamic(record)\r\n    | evaluate bag_unpack(record): (CustomerId: string, ResourceId: string)\r\n    | project CustomerId, Workspace = ResourceId;\r\nlet WorkspaceOutput = \r\n    WorkspaceDetails\r\n    | project \r\n        Node = CustomerId,\r\n        Source = \"\",\r\n        Target = \"\",\r\n        Label = Workspace,\r\n        NodeSize = 200,\r\n        NodeCategory = \"Workspace\",\r\n        BottomContent = \"\";\r\nlet NodeDetails = materialize (\r\n    Heartbeat\r\n    | distinct Computer, TenantId\r\n    | extend TenantId = TenantId\r\n    | summarize TenantIds = make_set(TenantId) by Computer\r\n    | summarize ComputerCount = count() by tostring(TenantIds)\r\n    | serialize \r\n    | extend Index = strcat(\"Agents Node \", row_number())\r\n    );\r\nlet NodeOutput =\r\nNodeDetails\r\n| project \r\n        Node = Index,\r\n                Label = iif((ComputerCount > 1),strcat(ComputerCount, \" Computers\"),strcat(ComputerCount, \" Computer\")),\r\n        NodeSize = ComputerCount,\r\n        NodeCategory = \"Agents\";\r\nlet RelationshipsOutput = \r\n        NodeDetails\r\n        | mv-expand todynamic(TenantIds) to typeof(string)\r\n        | project \r\n        Source = Index,\r\n        Target = TenantIds;\r\nunion WorkspaceOutput, NodeOutput, RelationshipsOutput\r\n\r\n\r\n",
+                          "size": 2,
+                          "timeContextFromParameter": "TimeRange",
+                          "queryType": 0,
+                          "resourceType": "microsoft.operationalinsights/workspaces",
+                          "crossComponentResources": [
+                            "{Workspaces}"
+                          ],
+                          "visualization": "graph",
+                          "sortBy": [],
+                          "graphSettings": {
+                            "type": 0,
+                            "topContent": {},
+                            "centerContent": {
+                              "columnMatch": "Label",
+                              "formatter": 13,
+                              "formatOptions": {
+                                "linkTarget": null,
+                                "showIcon": true
+                              }
+                            },
+                            "bottomContent": {
+                              "columnMatch": "BottomContent",
+                              "formatter": 1
+                            },
+                            "nodeIdField": "Node",
+                            "sourceIdField": "Source",
+                            "targetIdField": "Target",
+                            "graphOrientation": 2,
+                            "showOrientationToggles": true,
+                            "edgeLabel": "Relationship",
+                            "nodeSize": {
+                              "sizeField": "NodeSize",
+                              "minSize": 100,
+                              "maxSize": 100
+                            },
+                            "staticNodeSize": 100,
+                            "colorSettings": {
+                              "nodeColorField": "NodeCategory",
+                              "type": 3,
+                              "thresholdsGrid": [
+                                {
+                                  "operator": "==",
+                                  "thresholdValue": "Workspace",
+                                  "representation": "blue"
+                                },
+                                {
+                                  "operator": "==",
+                                  "thresholdValue": "Agents",
+                                  "representation": "orange"
+                                },
+                                {
+                                  "operator": "Default",
+                                  "thresholdValue": null,
+                                  "representation": "blue"
+                                }
+                              ]
+                            },
+                            "hivesMargin": 5
+                          },
+                          "mapSettings": {
+                            "locInfo": "LatLong"
+                          }
+                        },
+                        "name": "query - Graph Distribution by Agent Volume",
+                        "styleSettings": {
+                          "showBorder": true
+                        }
+                      }
+                    ]
+                  },
+                  "name": "group - Graph - Aggregated Agent and Workspace distribution",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "TabParameter",
+              "comparison": "isEqualTo",
+              "value": "Graph"
+            },
+            "name": "group - Graph"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "items": [
+                {
+                  "type": 1,
+                  "content": {
+                    "json": "## Workspace Distribution",
+                    "style": "info"
+                  },
+                  "conditionalVisibility": {
+                    "parameterName": "ShowHelp",
+                    "comparison": "isEqualTo",
+                    "value": "true"
+                  },
+                  "name": "text - 0"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "let ComputerFilter = \"\";\r\nlet MultiHomedOnly = \"false\";\r\nlet WorkspaceDetails = datatable (record: dynamic) [\r\n    dynamic([{WorkspaceDetails}])\r\n]\r\n    | mv-expand record to typeof(string)\r\n    | extend record = todynamic(record)\r\n    | evaluate bag_unpack(record): (CustomerId: string, ResourceId: string, WorkspaceLocation: string)\r\n    | summarize WorkspaceCount = count() by CustomerId, ResourceId, WorkspaceLocation\r\n    | project \r\n        CustomerId,\r\n        WorkspaceCount,\r\n        ResourceId, \r\n        WorkspaceLocation;\r\nWorkspaceDetails\r\n\r\n",
+                    "size": 2,
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspaces}"
+                    ],
+                    "visualization": "map",
+                    "mapSettings": {
+                      "locInfo": "AzureResource",
+                      "locInfoColumn": "ResourceId",
+                      "sizeSettings": "WorkspaceCount",
+                      "sizeAggregation": "Sum",
+                      "minSize": 10,
+                      "maxSize": 100,
+                      "minData": 1,
+                      "maxData": 100,
+                      "defaultSize": 1,
+                      "opacity": 0.7,
+                      "legendMetric": "WorkspaceCount",
+                      "numberOfMetrics": 50,
+                      "legendAggregation": "Sum",
+                      "itemColorSettings": null
+                    }
+                  },
+                  "name": "query - 1"
+                }
+              ]
+            },
+            "conditionalVisibility": {
+              "parameterName": "TabParameter",
+              "comparison": "isEqualTo",
+              "value": "Map"
+            },
+            "name": "group - Map"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "Workspaces",
+        "comparison": "isNotEqualTo"
+      },
+      "name": "group - Main Content"
     }
   ],
   "fallbackResourceIds": [
