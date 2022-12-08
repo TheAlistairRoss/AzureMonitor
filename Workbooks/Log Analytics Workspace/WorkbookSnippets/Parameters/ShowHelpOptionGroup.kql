@@ -1,0 +1,4 @@
+[
+    {"value":true, "label": "Yes", "selected": true},
+    {"value":false, "label": "No", "selected": false}
+]
