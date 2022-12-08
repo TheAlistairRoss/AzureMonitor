@@ -1,0 +1,3 @@
+resources
+| where type =~ "microsoft.operationalinsights/workspaces"
+| distinct subscriptionId
