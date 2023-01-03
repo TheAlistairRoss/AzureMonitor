@@ -1,0 +1,174 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscription}"
+        ],
+        "parameters": [
+          {
+            "id": "8791d350-db96-4640-a2b2-709f8547e8f4",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 300000
+                },
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ],
+              "allowCustom": true
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": {
+              "durationMs": 86400000
+            }
+          },
+          {
+            "id": "7f09f5a7-199d-4d1a-ac05-1c952619d8fc",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "query": "resources\r\n| where type =~ \"Microsoft.Automation/AutomationAccounts\"\r\n| distinct subscriptionId",
+            "crossComponentResources": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "b7c69905-a2e8-45e3-9171-1c7ca490cad5",
+            "version": "KqlParameterItem/1.0",
+            "name": "AutomationAccount",
+            "label": "Automation Account",
+            "type": 5,
+            "query": "resources\r\n| where type =~ \"Microsoft.Automation/AutomationAccounts\"",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          }
+        ],
+        "style": "pills",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "name": "parameters - 0"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let IgnoreJobs = dynamic('[\"ImportAutomationModule2\", \"Compile-ConfigurationV3\"]');\r\nlet BlankResults = datatable(ResultType:string, Count:int)[\r\n    \"Completed\", 0,\r\n    \"Failed\", 0,\r\n    \"Queued\", 0,\r\n    \"Running\", 0,\r\n    \"Stopped\", 0,\r\n    \"Suspended\", 0\r\n];\r\nAzureDiagnostics \r\n| where Category == \"JobLogs\"\r\n| where RunbookName_s !in (IgnoreJobs)\r\n| where ResultType in (\"Completed\", \"Failed\", \"Queued\", \"Running\", \"Stopped\", \"Suspended\")\r\n| summarize arg_max(TimeGenerated, ResultType) by JobId_g\r\n| summarize Count = count() by ResultType\r\n| join kind = fullouter (BlankResults) on ResultType\r\n| extend Count = iif(isempty(Count), Count1, Count)\r\n| project ResultType = ResultType1, Count",
+        "size": 3,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.automation/automationaccounts",
+        "crossComponentResources": [
+          "{AutomationAccount}"
+        ],
+        "visualization": "piechart",
+        "chartSettings": {
+          "seriesLabelSettings": [
+            {
+              "seriesName": "Completed",
+              "color": "green"
+            },
+            {
+              "seriesName": "Failed",
+              "color": "pink"
+            },
+            {
+              "seriesName": "Queued",
+              "color": "purple"
+            },
+            {
+              "seriesName": "Running",
+              "color": "turquoise"
+            },
+            {
+              "seriesName": "Stopped",
+              "color": "orange"
+            },
+            {
+              "seriesName": "Suspended",
+              "color": "blue"
+            }
+          ]
+        }
+      },
+      "customWidth": "33",
+      "showPin": true,
+      "name": "Automation Account Job Statistics",
+      "styleSettings": {
+        "maxWidth": "33"
+      }
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
